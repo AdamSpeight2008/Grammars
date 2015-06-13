@@ -1,33 +1,45 @@
-﻿grammar:=
+﻿grammar:= grammar
 {
-  grammar-header  ::= "grammar" WS* ":=" grammar-name WS* EoL
-  grammar-body    ::= "{" WS* EoL grammar-rule* "}" WS* EoL
-  grammar-name    ::=
-  grammar-rules   ::= grammar-rule | grammar-comment
-  grammar-rule    ::= WS* rule-name WS* "::=" WS* rule-definition WS* EoL
-  grammar-comment ::= WS* "//" grammar-comment-char* EoL
+  grammars         ::= WS* grammar ( EoL+ WS+ grammar )*
+  grammar          ::= grammar-head grammar-body
+  grammar-header   ::= "grammar" WS* ":=" grammar-name WS* inherits-grammar-inherits? EoL
+  grammar-inherits ::= "<:" WS+ grammar-name
+  grammar-body     ::= "{" WS* EoL grammar-rule* "}" WS* EoL
+  grammar-name     ::=
+  grammar-rules    ::= grammar-rule | grammar-comment
+  grammar-rule     ::= WS* rule-name WS* "::=" WS* rule-definition WS* EoL
+  grammar-comment  ::= WS* "//" grammar-comment-char* EoL
 
   // Rules
-  rule-name       ::=
-  rule-name-char  ::=
+  rule-name        ::= rule-name-letter rule-name-char*
+  rule-name-char   ::= ( rule-name-letter | rule-name-digit | rule-name-symbol )
+  rule-name-letter ::= 'A'-'Z' | 'a'-'z'
+  rule-name-digit  ::= '0'-'9'
+  rule-name-symbol ::= ( '-' | '_' )
   rule-definition ::= clause*
+
   // Enviroment
   Enviroment-Rule ::= "!<" Enviroment-Body ">!"
   Enviroment-Body ::=
+
   //
   clause          ::= ( Text-Clause | Grouped | Alternative | ZeroOrMore | OneOrMore | Optional | Repeatitions )
   Repeatitions    ::= ( Repeatition | ReapeatsAtLeast | RepeatsAtMost | RepeatsBounded )
   Text-Clause     ::= ( TextQuote | CharQuote | CharRange )
+
   // Basic Clauses
   TextQuote       ::= '"' TextQuoteChar+ '"'
   CharQuote       ::= "'" TextQuoteChar "'"
   CharRange       ::= CharQoute '-' CharQuote
+
   // Groupings
   Grouped         ::= '(' clause ( WS+ clause )* ')'
   Alternatives    ::=  ( clause '|' clause ) | ( '(' WS* clause ( WS* '|' WS* clause )+ WS* ')'
   ZeroOrMore      ::= clause '*'
   OneOrMore       ::= clause '+'
   Optional        ::= clause '?'
+
+  // Repeatitions
   Repeatition     ::= clause '{' WS* times WS* '}'
   RepeatsAtLeast  ::= clause '{' WS* min WS* ',' WS* '}'
   RepeatsAtMost   ::= clause '{' WS* ',' WS* max WS* '}'
