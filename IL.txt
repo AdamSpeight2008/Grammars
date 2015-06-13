@@ -1,0 +1,26 @@
+grammar := IL
+{
+START ::= deecls
+decls ::= /* EMPTY */ | decls decl
+decl  ::= (  ( classHead     '{' classDecls  '}' )
+           | ( nameSpaceHead '{' decls       '}' )
+           | ( methodHead    '{' methodDecls '}' )
+           | fieldDecl
+           | dataDecl
+           | yTableDecl
+           | ytfixypDecl
+           | extSourceSpec
+           | fileDecl
+           | ( assemblyHead    '{' assemblyDecls    '}' )
+           | ( assemblyRefHead '{' assemblyRefDecls '}' )
+           | ( comtypeHead     '{' comtypeDecls     '}' )
+           | ( manifest        '{' manifestDecls    '}' )
+           | moduleHead
+           | secDecl
+           | customAttrDecl
+           | ".subsystem" int32
+           | ".corflags" int32
+           | ".file" "alignment" int32
+           | ".imagebase" int64
+           | languageDecl
+}
