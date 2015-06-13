@@ -2,9 +2,9 @@ grammar := IL
 {
 START ::= deecls
 decls ::= /* EMPTY */ | decls decl
-decl  ::= (  ( classHead     '{' classDecls  '}' )
-           | ( nameSpaceHead '{' decls       '}' )
-           | ( methodHead    '{' methodDecls '}' )
+decl  ::= (  ( classHead       '{' classDecls       '}' )
+           | ( nameSpaceHead   '{' decls            '}' )
+           | ( methodHead      '{' methodDecls      '}' )
            | fieldDecl
            | dataDecl
            | yTableDecl
@@ -23,4 +23,100 @@ decl  ::= (  ( classHead     '{' classDecls  '}' )
            | ".file" "alignment" int32
            | ".imagebase" int64
            | languageDecl
+          )
+
+ compQstring ::= QSTRING | ( compQstring '+' QSTRING )
+
+languageDecl ::= (  ( ".language" SQSTRING )
+                  | ( ".language" SQSTRING ',' SQSTRING )
+                  | ( ".language" SQSTRING ',' SQSTRING ',' SQSTRING )
+                 )
+
+customAttriDecl ::= (  ( ".custom" customType )
+                     | ( ".custom" customType '=' compQsstring )
+                     | ( customHead bytes ')'
+                     | ( ".custom" '(' ownerType ')' customType )
+                     | ( ".custom" '(' ownerType ')' customType '=' compQstring )
+                     | customHeadWithOwner byte ')'
+                    )
+moduleHead ::= (  ".module"
+                | ".module" name1
+                | ".module" "extern" name1
+               )
+
+vtfixupDecl ::= "vtfixup" '[' int32 ']' vtfixupAttr "at" id
+
+vtfixupAttr ::= ( | /* Empty */
+                  | vtfixupAttr "int32"
+                  | vtfixupAttr "int64"
+                  | vtfixupAttr "fromunmanaged"
+                  | vtfixupAttr "callmostderived"
+                )
+
+vtableDecl ::= vtableHead bytes ')'
+
+vtableHead ::= ".vtable" '=' '('
+
+nameSpaceHead ::= ".namespace" name1
+
+classHead ::= ".class" classAttr od extendsClause implClause
+
+classAttr ::=  (  /* EMPTY */
+                | classAttr "public"
+                | classAttr "private"
+                | classAttr "value"
+                | classAttr "enum"
+                | classAttr "interface"
+                | classAttr "sealed"
+                | classAttr "abstract"
+                | classAttr "auto"
+                | classAttr "sequential"
+                | classAttr "explicit"
+                | classAttr "ansi"
+                | classAttr "unicode"
+                | classAttr "autochar"
+                | classAttr "import"
+                | classAttr "serializable"
+                | classAttr "nested" "public"
+                | classAttr "nested" "private"
+                | classAttr "nested" "family"
+                | classAttr "nested" "assembly"
+                | classAttr "nested" "famandassem"
+                | classAttr "nessed" "famorassem"
+                | classAttr "beforefieldinit"
+                | classAttr "specialname"
+                | classAttr "rtspecialname"
+               )
+
+extendsClause ::=  /* EMPTY */ | ( "extends" className )
+   implClause ::=  /* EMPTY */ | ( "implements" classNames )
+
+classNames ::= ( classNames ',' className ) | className
+classDecls ::= /* EMPTY */ | ( classDecls classDecl )
+classDecl  ::= (  ( methodHead   methodDecls '}' )
+                | ( classHead '{' classDecls '}' )
+                | ( eventHead '{' eventDecls '}' )
+                | ( propHead  '{' propDecls '}' )
+                | fieldDecl
+                | dataDecl
+                | secDecl
+                | extSourceSpec
+                | customAttrDecl
+                | ( ".size" int32 )
+                | ( ".pack" int32 )
+                | ( exportHead '{' comTypeDecls '}' )
+                | ( ".overrides" typeSpec "::" methodName "with" callConv
+                      type typeSpc "::" methodName '{' sigArgs '}' )
+                | languageDecl
+               )
+
+fieldDecl ::= ".field" repeatOpt fieldAttr type id atOpt initOpt
+
+atOpt ::= /* EMPTY */ | ( "at" id )
+initOpt ::= /* EMPTY */ | ( '=' fieldInit )
+repeatOpt ::= /* EMPTY */ | ( '[' int32 ']' )
+
+customHead ::= ".custom" customType '=' '('
+customHeadWithOwner ::= ".custom" '(' ownerType ')' customType '=' '('
+
 }
