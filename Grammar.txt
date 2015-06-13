@@ -10,7 +10,7 @@
   // Rules
   rule-name       ::=
   rule-name-char  ::=
-  rule-definition ::=
+  rule-definition ::= clause*
   // Enviroment
   Enviroment-Rule ::= "!<" Enviroment-Body ">!"
   Enviroment-Body ::=
