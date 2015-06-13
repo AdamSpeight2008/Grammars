@@ -1,0 +1,37 @@
+﻿grammar:=
+{
+  grammar-header  ::= "grammar" WS* ":=" grammar-name WS* EoL
+  grammar-body    ::= "{" WS* EoL grammar-rule* "}" WS* EoL
+  grammar-name    ::=
+  grammar-rules   ::= grammar-rule | grammar-comment
+  grammar-rule    ::= WS* rule-name WS* "::=" WS* rule-definition WS* EoL
+  grammar-comment ::= WS* "//" grammar-comment-char* EoL
+
+  // Rules
+  rule-name       ::=
+  rule-name-char  ::=
+  rule-definition ::=
+  // Enviroment
+  Enviroment-Rule ::= "!<" Enviroment-Body ">!"
+  Enviroment-Body ::=
+  //
+  clause          ::= ( Grouped | Alternative | ZeroOrMore | OneOrMore | Optional | Repeatitions )
+  Repeatitions    ::= ( Repeatition | ReapeatsAtLeast | RepeatsAtMost | RepeatsBounded )
+
+  // Basic Clauses
+  TextQuote       ::= '"' TextQuoteChar+ '"'
+  CharQuote       ::= "'" TextQuoteChar "'"
+  // Groupings
+  Grouped         ::= '(' clause ( WS+ clause )* ')'
+  Alternatives    ::=  ( clause '|' clause ) | ( '(' WS* clause ( WS* '|' WS* clause )+ WS* ')'
+  ZeroOrMore      ::= clause '*'
+  OneOrMore       ::= clause '+'
+  Optional        ::= clause '?'
+  Repeatition     ::= clause '{' WS* times WS* '}'
+  RepeatsAtLeast  ::= clause '{' WS* min WS* ',' WS* '}'
+  RepeatsAtMost   ::= clause '{' WS* ',' WS* max WS* '}'
+  RepeatsBounded  ::= clause '{' WS* min WS* ',' WS* max WS* '}'
+  times           ::= ('0'-'9')+
+  min             ::= ('0'-'9')+
+  max             ::= ('0'-'9')+
+}
