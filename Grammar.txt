@@ -15,12 +15,13 @@
   Enviroment-Rule ::= "!<" Enviroment-Body ">!"
   Enviroment-Body ::=
   //
-  clause          ::= ( Grouped | Alternative | ZeroOrMore | OneOrMore | Optional | Repeatitions )
+  clause          ::= ( Text-Clause | Grouped | Alternative | ZeroOrMore | OneOrMore | Optional | Repeatitions )
   Repeatitions    ::= ( Repeatition | ReapeatsAtLeast | RepeatsAtMost | RepeatsBounded )
-
+  Text-Clause     ::= ( TextQuote | CharQuote | CharRange )
   // Basic Clauses
   TextQuote       ::= '"' TextQuoteChar+ '"'
   CharQuote       ::= "'" TextQuoteChar "'"
+  CharRange       ::= CharQoute '-' CharQuote
   // Groupings
   Grouped         ::= '(' clause ( WS+ clause )* ')'
   Alternatives    ::=  ( clause '|' clause ) | ( '(' WS* clause ( WS* '|' WS* clause )+ WS* ')'
