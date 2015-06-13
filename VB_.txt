@@ -5,18 +5,19 @@
 
 Start				    	         ::=  LogicalLine*
 LogicalLine			  	       ::=  LogicalLineElement*  Comment? EoL
-LogicalLineElement	       ::=  WhiteSpace  |  LineContinuation  |  Token
-Token     					       ::=  Identifier	| Keyword	| Literal	| Separator	| Operator
+LogicalLineElement	       ::=  ( WhiteSpace  |  LineContinuation  |  Token )
+Token     					       ::=  ( Identifier	| Keyword	| Literal	| Separator	| Operator )
 
 
-// 13.1.1 Characters and Lines
+// 13.1.1 Chars and Lines
 
-Character  				         ::=    !< any Unicode character except a EoL >!
-EoL  		       ::=  	!< Unicode carriage return character (0x000D) >!
-                                | !< Unicode linefeed character (0x000A) >!
-                                | !< Unicode carriage return character >!  !< Unicode linefeed character >!
-                                | !< Unicode line separator character (0x2028) >!
-                                | !< Unicode paragraph separator character (0x2029) >!
+Char  				         ::=    !< any Unicode Char except a EoL >!
+EoL  		                   ::=  (  !< Unicode carriage return Char (0x000D) >!
+                                 | !< Unicode linefeed Char (0x000A) >!
+                                 | !< Unicode carriage return Char >!  !< Unicode linefeed Char >!
+                                 | !< Unicode line separator Char (0x2028) >!
+                                 | !< Unicode paragraph separator Char (0x2029) >!
+                                )
 LineContinuation  	       ::=  WhiteSpace  '_'   WhiteSpace*  EoL
 Comma  					           ::=  ','   EoL?
 OpenParenthesis  		       ::=  '('  EoL?
@@ -25,167 +26,108 @@ OpenCurlyBrace  		       ::=  '{'  EoL?
 CloseCurlyBrace  		       ::=        EoL?  '}'
 Equals  			    	       ::=  '='   EoL?
 ColonEquals  			         ::=  ":="  EoL?
-WhiteSpace 				         ::=   	!< Unicode blank characters (class Zs) >!
-                                |	!< Unicode tab character (0x0009) >!
-Comment  				           ::=  CommentMarker Character*
-CommentMarker 			       ::=    SingleQuoteCharacter
-                               |  "REM"
-SingleQuoteCharacter 	     ::=    "'"
-                               |  !< Unicode left single-quote character (0x2018) >!
-                               | 	!< Unicode right single-quote character (0x2019) >!
+WhiteSpace 				         ::=   	!< Unicode blank Chars (class Zs) >!
+                                |	!< Unicode tab Char (0x0009) >!
+Comment  				           ::=  CommentMarker Char*
+CommentMarker 			       ::= (  SingleQuoteChar  |  "REM" )
+SingleQuoteChar 	     ::= (    "'"
+                                 |  !< Unicode left single-quote Char (0x2018) >!
+                                 | 	!< Unicode right single-quote Char (0x2019) >!
+                               )
 
 // 13.1.2Identifiers
 
-Identifier  			         ::= 	  NonEscapedIdentifier  TypeCharacter?
-                               |  Keyword  TypeCharacter
-                               |  EscapedIdentifier
-
-NonEscapedIdentifier 	     ::=  !< IdentifierName but not Keyword >!
-scapedIdentifier  		     ::=  '['  IdentifierName ']'
-IdentifierName 		         ::=  IdentifierStart  IdentifierCharacter*
-IdentifierStart  		       ::=	   AlphaCharacter
-                               |   UnderscoreCharacter  IdentifierCharacter
-IdentifierCharacter  	     ::=    UnderscoreCharacter
-                               |  AlphaCharacter
-                               |  NumericCharacter
-                               |  CombiningCharacter
-                               |  FormattingCharacter
-AlphaCharacter  		       ::=  !< Unicode alphabetic character (classes Lu, Ll, Lt, Lm, Lo, Nl) >!
-NumericCharacter  		     ::=  !< Unicode decimal digit character (class Nd) >!
-CombiningCharacter  	     ::=  !< Unicode combining character (classes Mn, Mc) >!
-FormattingCharacter		     ::=  !< Unicode formatting character (class Cf) >!
-UnderscoreCharacter  	     ::=  !< Unicode connection character (class Pc) >!
-IdentifierOrKeyword 	     ::=     Identifier
-                               |   Keyword
-TypeCharacter  		         ::=    IntegerTypeCharacter
-                               |  LongTypeCharacter
-                               |  DecimalTypeCharacter
-                               |  SingleTypeCharacter
-                               |	DoubleTypeCharacter
-                               |	StringTypeCharacter
-IntegerTypeCharacter       ::=  '%'
-LongTypeCharacter  		     ::=  '&'
-DecimalTypeCharacter       ::=  '@'
-SingleTypeCharacter 	     ::=  '!'
-DoubleTypeCharacter  	     ::=  '#'
-StringTypeCharacter  	     ::=  '$'
+Identifier  			         ::= ( ( NonEscapedIdentifier  TypeChar? ) | ( Keyword  TypeChar )  |  EscapedIdentifier  )
+NonEscapedIdentifier ::=  !< IdentifierName but not Keyword >!
+scapedIdentifier  	 ::=  '['  IdentifierName ']'
+IdentifierName 		   ::=  IdentifierStart  IdentifierChar*
+IdentifierStart  		 ::=	AlphaChar  |  (  UnderscoreChar  IdentifierChar )
+IdentifierChar  	   ::=  ( UnderscoreChar  |  AlphaChar  |  NumericChar  |  CombiningChar  |  FormattingChar )
+AlphaChar  		       ::=  !< Unicode alphabetic Char (classes Lu, Ll, Lt, Lm, Lo, Nl) >!
+NumericChar  		     ::=  !< Unicode decimal digit Char (class Nd) >!
+CombiningChar  	     ::=  !< Unicode combining Char (classes Mn, Mc) >!
+FormattingChar		   ::=  !< Unicode formatting Char (class Cf) >!
+UnderscoreChar  	   ::=  !< Unicode connection Char (class Pc) >!
+IdentifierOrKeyword  ::=  ( Identifier  |  Keyword )
+TypeChar  		       ::= ( IntegerTypeChar | LongTypeChar | DecimalTypeChar | SingleTypeChar | DoubleTypeChar | StringTypeChar )
+IntegerTypeChar      ::=  '%'
+LongTypeChar  		   ::=  '&'
+DecimalTypeChar      ::=  '@'
+SingleTypeChar 	     ::=  '!'
+DoubleTypeChar  	   ::=  '#'
+StringTypeChar  	   ::=  '$'
 
 
 //	13.1.3  Keywords
 
-Keyword                    ::=  !< member of keyword table in 2.3 >!
+Keyword              ::=  !< member of keyword table in 2.3 >!
 
 //	13.1.4  Literals
-Literal 		      		     ::=    BooleanLiteral
-                               |  IntegerLiteral
-                               |  FloatingPointLiteral
-                               |  StringLiteral
-                               |  CharacterLiteral
-                               |  DateLiteral
-                               |  Nothing
-BooleanLiteral  		       ::=  "True"  |  "False"
-IntegerLiteral  		       ::=  IntegralLiteralValue  IntegralTypeCharacter?
-IntegralLiteralValue       ::=    IntLiteral
-                               |  HexLiteral
-                               |  OctalLiteral
-IntegralTypeCharacter      ::=    ShortCharacter
-                               |  UnsignedShortCharacter
-                               |  IntegerCharacter
-                               |  UnsignedIntegerCharacter
-                               |  LongCharacter
-                               |  UnsignedLongCharacter
-                               |  IntegerTypeCharacter
-                               |  LongTypeCharacter
-ShortCharacter  		        ::=  'S'
-UnsignedShortCharacter      ::=  "US"
-IntegerCharacter  		      ::=  'I'
-UnsignedIntegerCharacter    ::=  "UI"
-LongCharacter  		          ::=  'L'
-UnsignedLongCharacter  	    ::=  "UL"
-IntLiteral  			          ::=  Digit+
-HexLiteral  			          ::=  "&H"  HexDigit+
-OctalLiteral 			          ::=  "&O"  OctalDigit+
-Digit 	 			              ::=  '0'-'9'
-HexDigit  			            ::=  '0'-'9' | 'A'-'F'
-OctalDigit			            ::=  '0'-'7'
-FloatingPointLiteral  	    ::=   FloatingPointLiteralValue  FloatingPointTypeCharacter?
-                               |  IntLiteral  FloatingPointTypeCharacter
-FloatingPointTypeCharacter  ::=  	SingleCharacter
-                               |  DoubleCharacter
-                               | 	DecimalCharacter
-                               | 	SingleTypeCharacter
-                               | 	DoubleTypeCharacter
-                               | 	DecimalTypeCharacter
-SingleCharacter  		        ::=  'F'
-DoubleCharacter  		        ::=  'R'
-DecimalCharacter  		      ::=  'D'
-FloatingPointLiteralValue   ::=	      IntLiteral  '.'  IntLiteral  Exponent?
-                               | '.'	IntLiteral  Exponent?
-                               |   	  IntLiteral  Exponent
-Exponent 				            ::=  'E'  Sign?  IntLiteral
-Sign  				              ::=  '+'  |  '-'
-StringLiteral  		          ::=	DoubleQuoteCharacter  StringCharacter*  DoubleQuoteCharacter
-DoubleQuoteCharacter  	    ::=   '"'
-                               |  !< Unicode left double-quote character (0x201C) >!
-                               |  !< Unicode right double-quote character (0x201D) >!
-StringCharacter 		        ::=   !< Character except for DoubleQuoteCharacter >!
-                               |   DoubleQuoteCharacter  DoubleQuoteCharacter
-CharacterLiteral 	 	        ::=  DoubleQuoteCharacter  StringCharacter  DoubleQuoteCharacter  'C'
-DateLiteral 			          ::=  '#'  Whitespace* DateOrTime  Whitespace*  '#'
-DateOrTime 			            ::=   DateValue  Whitespace+  TimeValue
-                               |  DateValue
-                               |  TimeValue
-DateValue  		              ::=   MonthValue  '/'  DayValue  '/'  YearValue
-                               |  MonthValue  '-'  DayValue  '-'  YearValue
-TimeValue				            ::=   HourValue  ':' MinuteValue (':' SecondValue )? WhiteSpace* AMPM?
-                               |  HourValue  WhiteSpace*  AMPM?
-MonthValue  			          ::=  IntLiteral
-DayValue  		            	::=  IntLiteral
-YearValue             			::=  IntLiteral
-HourValue  		            	::=  IntLiteral
-MinuteValue  		          	::=  IntLiteral
-SecondValue		              ::=  IntLiteral
-AMPM	              				::=  "AM"  |  "PM"
-ElseIf 			              	::=  "ElseIf"  |  "Else If"
-Nothing 				            ::=  "Nothing"
-Separator  			            ::=   '(' | ')' | '{' | '}' | '!' | '#' | ',' | '.' | ':' | '?'
-Operator 				            ::=	  '&' | '*' | '+' | '-' | '/' | '\' | '^' | '<' | '=' | '>'
+Literal 		      	  ::=  ( BooleanLiteral | IntegerLiteral | FloatingPointLiteral | StringLiteral | CharLiteral | DateLiteral | Nothing )
+BooleanLiteral  		  ::=  "True"  |  "False"
+IntegerLiteral  		  ::=  IntegralLiteralValue  IntegralTypeChar?
+IntegralLiteralValue  ::=  ( IntLiteral | HexLiteral | OctalLiteral )
+IntegralTypeChar      ::=  ( ShortChar | UnsignedShortChar | IntegerChar | UnsignedIntegerChar | LongChar | UnsignedLongChar | IntegerTypeChar | LongTypeChar )
+ShortChar  		        ::=  'S'
+UnsignedShortChar     ::=  "US"
+IntegerChar  		      ::=  'I'
+UnsignedIntegerChar   ::=  "UI"
+LongChar  		        ::=  'L'
+UnsignedLongChar  	  ::=  "UL"
+IntLiteral  			    ::=  Digit+
+HexLiteral  			    ::=  "&H"  HexDigit+
+OctalLiteral 			    ::=  "&O"  OctalDigit+
+Digit 	 			        ::=  '0'-'9'
+HexDigit  			      ::=  '0'-'9' | 'A'-'F'
+OctalDigit			      ::=  '0'-'7'
+FloatingPointLiteral  ::=  ( FloatingPointLiteralValue FloatingPointTypeChar? ) | ( IntLiteral FloatingPointTypeChar )
+FloatingPointTypeChar ::=  ( SingleChar | DoubleChar |	DecimalChar |	SingleTypeChar | DoubleTypeChar |	DecimalTypeChar )
+SingleChar  		      ::=  'F'
+DoubleChar  		      ::=  'R'
+DecimalChar  		      ::=  'D'
+FloatingPointLiteralValue ::=  ( IntLiteral '.' IntLiteral Exponent? ) | ( '.' IntLiteral Exponent? ) | ( IntLiteral Exponent )
+Exponent 				          ::=  'E'  Sign?  IntLiteral
+Sign  				            ::=  '+'  |  '-'
+StringLiteral  		        ::=	DoubleQuoteChar  StringChar*  DoubleQuoteChar
+DoubleQuoteChar  	        ::=  ( '"' |  !< Unicode left double-quote Char (0x201C) >!  |  !< Unicode right double-quote Char (0x201D) >! )
+StringChar 		            ::=  !< Char except for DoubleQuoteChar >!  |  ( DoubleQuoteChar  DoubleQuoteChar )
+CharLiteral 	 	          ::=  DoubleQuoteChar  StringChar  DoubleQuoteChar  'C'
+DateLiteral 			        ::=  '#'  Whitespace* DateOrTime  Whitespace*  '#'
+DateOrTime 			          ::=  ( DateValue  Whitespace+  TimeValue )  |  DateValue  |  TimeValue
+DateValue  		            ::=  ( MonthValue  '/'  DayValue  '/'  YearValue ) | ( MonthValue  '-'  DayValue  '-'  YearValue )
+TimeValue				          ::=  ( HourValue  ':' MinuteValue (':' SecondValue )? WhiteSpace* AMPM? ) | ( HourValue WhiteSpace* AMPM? )
+MonthValue  			        ::=  IntLiteral
+DayValue  		            ::=  IntLiteral
+YearValue             		::=  IntLiteral
+HourValue  		            ::=  IntLiteral
+MinuteValue  		          ::=  IntLiteral
+SecondValue		            ::=  IntLiteral
+AMPM	              			::=  "AM"  |  "PM"
+ElseIf 			              ::=  "ElseIf"  |  "Else If"
+Nothing 				          ::=  "Nothing"
+Separator  			          ::=  ( '(' | ')' | '{' | '}' | '!' | '#' | ',' | '.' | ':' | '?' )
+Operator 				          ::=	 ( '&' | '*' | '+' | '-' | '/' | '\' | '^' | '<' | '=' | '>' )
 
 
 //  13.2    Preprocessing Directives
 //  13.2.1  Conditional Compilation
 
-Start                       ::=   CCStatement*
-CCStatement                 ::=   CCConstantDeclaration
-                               |  CCIfGroup
-                               |  LogicalLine
-CCExpr                ::=   LiteralExpr
-                               |  CCParenthesizedExpr
-                               |  CCSimpleNameExpr
-                               |  CCCastExpr
-                               |  CCOperatorExpr
-                               |  CCConditionalExpr
+Start                 ::=   CCStatement*
+CCStatement           ::=  ( CCConstantDeclaration | CCIfGroup | LogicalLine )
+CCExpr                ::=  ( LiteralExpr | CCParenthesizedExpr | CCSimpleNameExpr | CCCastExpr | CCOperatorExpr | CCConditionalExpr )
 CCParenthesizedExpr   ::=  '('  CCExpr  ')'
 CCSimpleNameExpr      ::=  Identifier
-CCCastExpr            ::=   DirectCast  '('  CCExpr  ','  TypeName  ')'
-                               |  TryCast     '('  CCExpr  ','  TypeName  ')'
-                               |  CType       '('  CCExpr  ','  TypeName  ')'
-                               |  CastTarget  '('  CCExpr  ')'
-CCOperatorExpr        ::= 	CCUnaryOperator  CCExpr
-                               |	CCExpr  CCBinaryOperator  CCExpr
-CCUnaryOperator             ::=   '+' | '-' | "Not"
-CCBinaryOperator            ::=   '+' | '-' | '*' | '/' | '\' | '^' | '=' | '<' | '>' | '&'
-                               |   "<>" |	"<=" | ">="  | "<<" | ">>" | "And" | "Or" | "Xor" | "AndAlso" | "OrElse" | "Mod"
-CCConditionalExpr     ::=	  "If"  '('  CCExpr  ','  CCExpr  ','  CCExpr  ')'
-                               |  "If"  '('  CCExpr  ','  CCExpr  ')'
-CCConstantDeclaration       ::=   '#'  "Const"  Identifier  '='  CCExpr  EoL
-CCIfGroup                   ::=   '#'  "If"  CCExpr  Then?  EoL
-                                  CCStatement*
-                                  CCElseIfGroup*
-                                  CCElseGroup?
-                                  '#'  "End If"  EoL
-CCElseIfGroup               ::= 	'#'  "ElseIf"  CCExpr  Then?  EoL  CCStatement*
-CCElseGroup                 ::= 	'#'  "Else"  EoL  CCStatement*
+CCCastExpr            ::=   ( DirectCast '(' CCExpr ',' TypeName ')' ) | ( TryCast '(' CCExpr ',' TypeName ')' )
+                          | ( CType '(' CCExpr ',' TypeName ')' ) | ( CastTarget '(' CCExpr ')' )
+CCOperatorExpr        ::= (	CCUnaryOperator CCExpr ) | ( CCExpr CCBinaryOperator CCExpr )
+CCUnaryOperator       ::= ( '+' | '-' | "Not" )
+CCBinaryOperator      ::= ( '+' | '-' | '*' | '/' | '\' | '^' | '=' | '<' | '>' | '&' | "<>" |	"<=" | ">="
+                           | "<<" | ">>" | "And" | "Or" | "Xor" | "AndAlso" | "OrElse" | "Mod" )
+CCConditionalExpr     ::= ( "If" '(' CCExpr ',' CCExpr ',' CCExpr ')' )  |  ( "If" '(' CCExpr ',' CCExpr ')' )
+CCConstantDeclaration ::=   '#'  "Const"  Identifier  '='  CCExpr  EoL
+CCIfGroup             ::= ( '#' "If" CCExpr Then? EoL CCStatement* CCElseIfGroup* CCElseGroup? '#' "End If" EoL )
+CCElseIfGroup         ::= ( '#' "ElseIf" CCExpr Then? EoL CCStatement* )
+CCElseGroup           ::= ( '#' "Else" EoL CCStatement* )
 
 
 //  13.2.2    External Source Directives
@@ -201,9 +143,7 @@ ExternalSourceGroup         ::=   '#'  ExternalSource  '('  StringLiteral  ','  
 
 Start                       ::=   RegionStatement*
 RegionStatement             ::=   RegionGroup  |  LogicalLine
-RegionGroup                 ::= 	'#'  "Region"  StringLiteral  EoL
-                                	RegionStatement*
-                                	'#'  "End" "Region"  EoL
+RegionGroup                 ::= 	( '#' "Region" StringLiteral EoL RegionStatement* '#' "End" "Region" EoL )
 
 
 //  13.2.4    External Checksum Directives
@@ -214,95 +154,58 @@ ExternalChecksumStatement   ::=   '#'  ExternalChecksum  '('  StringLiteral  ','
 
 //  13.3    Syntactic Grammar
 
-AccessModifier                    ::=   "Public"
-                                     |  "Protected"
-                                     |  "Friend"
-                                     |  "Private"
-                                     |  "Protected Friend"
-TypeParameterList                 ::= 	OpenParenthesis  "Of"  TypeParameters  CloseParenthesis
-TypeParameters                    ::= 	TypeParameter
-                                     |	TypeParameters  Comma  TypeParameter
-TypeParameter                     ::=	  VarianceModifier?  Identifier  TypeParameterConstraints?
+AccessModifier                    ::=  ( "Public" | "Protected" | "Friend" | "Private" | "Protected Friend" )
+TypeParameterList                 ::=  (	OpenParenthesis  "Of"  TypeParameters  CloseParenthesis
+TypeParameters                    ::=  TypeParameter | ( TypeParameters  Comma  TypeParameter )
+TypeParameter                     ::=	 VarianceModifier?  Identifier  TypeParameterConstraints?
 VarianceModifier                  ::=	  "In"  |  "Out"
-TypeParameterConstraints          ::= 	"As"  Constraint
-                                     |  "As"  OpenCurlyBrace  ConstraintList  CloseCurlyBrace
-ConstraintList                    ::=   ConstraintList  Comma  Constraint
-                                     |  Constraint
-Constraint                        ::=   TypeName
-                                     |  "New"
-                                     |  "Structure"
-                                     |  "Class"
+TypeParameterConstraints          ::=  ( "As"  Constraint ) | ( "As" OpenCurlyBrace ConstraintList CloseCurlyBrace )
+ConstraintList                    ::=  ( ConstraintList Comma Constraint ) | Constraint
+Constraint                        ::=  ( TypeName | "New" | "Structure" | "Class" )
 
 
 // 13.3.1     Attributes
 
-Attributes                        ::=   AttributeBlock
-                                     |  Attributes  AttributeBlock
+Attributes                        ::=   AttributeBlock | ( Attributes  AttributeBlock )
 AttributeBlock                    ::=   EoL?  '<'  AttributeList  EoL?  '>'  EoL?
-AttributeList                     ::=   Attribute
-                                     |  AttributeList  Comma  Attribute
-Attribute                         ::= 	( AttributeModifier  ':'  )?  SimpleTypeName
-                                        (  OpenParenthesis  AttributeArguments?  CloseParenthesis)?
-AttributeModifier                 ::=   "Assembly"
-                                     |  "Module"
-AttributeArguments                ::=   AttributePositionalArgumentList
-                                     |  AttributePositionalArgumentList  Comma  VariablePropertyInitializerList
-                                     |  VariablePropertyInitializerList
-AttributePositionalArgumentList   ::=   AttributeArgumentExpr
-                                     |  AttributePositionalArgumentList  Comma  AttributeArgumentExpr
-VariablePropertyInitializerList   ::=   VariablePropertyInitializer
-                                     |  VariablePropertyInitializerList  Comma  VariablePropertyInitializer
+AttributeList                     ::=   Attribute | ( AttributeList  Comma  Attribute )
+Attribute                         ::= 	( AttributeModifier ':' )? SimpleTypeName OpenParenthesis AttributeArguments? CloseParenthesis)?
+AttributeModifier                 ::=   "Assembly" | "Module"
+AttributeArguments                ::=   ( AttributePositionalArgumentList
+                                     |  ( AttributePositionalArgumentList  Comma  VariablePropertyInitializerList )
+                                     |  VariablePropertyInitializerList )
+AttributePositionalArgumentList   ::=   AttributeArgumentExpr | ( AttributePositionalArgumentList Comma AttributeArgumentExpr )
+VariablePropertyInitializerList   ::=   VariablePropertyInitializer | ( VariablePropertyInitializerList Comma VariablePropertyInitializer )
 VariablePropertyInitializer       ::=   IdentifierOrKeyword  ColonEquals  AttributeArgumentExpr
-AttributeArgumentExpr       ::= 	ConstantExpr
-                                     |	GetTypeExpr
-                                     |  ArrayExpr
+AttributeArgumentExpr             ::= ( ConstantExpr | GetTypeExpr | ArrayExpr )
 
 
 //  13.3.2    Source Files and Namespaces
 
-Start                             ::= 	OptionStatement*
-                                      	ImportsStatement*
-                                        AttributesStatement*
-                                        NamespaceMemberDeclaration*
-EoS               ::=   EoL  |  ':'
-AttributesStatement               ::=   Attributes  EoS
-OptionStatement                   ::= 	  OptionExplicitStatement
-                                      |	  OptionStrictStatement
-                                      |	  OptionCompareStatement
-                                      |	  OptionInferStatement
+Start                             ::=  OptionStatement* ImportsStatement* AttributesStatement* NamespaceMemberDeclaration*
+EoS                               ::=  EoL  |  ':'
+AttributesStatement               ::=  Attributes  EoS
+OptionStatement                   ::=  ( OptionExplicitStatement | OptionStrictStatement | OptionCompareStatement | OptionInferStatement )
 OptionExplicitStatement           ::=  "Option"  "Explicit"  OnOff?  EoS
-OnOff                             ::=  "On"  |  "Off"
+OnOff                             ::=  "On" | "Off"
 OptionStrictStatement             ::=  "Option"  "Strict"  OnOff?  EoS
 OptionCompareStatement            ::=  "Option"  "Compare"  CompareOption  EoS
-CompareOption                     ::=    "Binary"
-                                      |  "Text"
-OptionInferStatement              ::=  "Option"  "Infer"  OnOff?  EoS
-ImportsStatement                  ::=  "Imports"  ImportsClauses  EoS
-ImportsClauses                    ::=     ImportsClause
-                                      |	  ImportsClauses  Comma  ImportsClause
-ImportsClause                     ::= 	  AliasImportsClause
-                                      |	  MembersImportsClause
-                                      |	  XMLNamespaceImportsClause
+CompareOption                     ::=  "Binary" | "Text"
+OptionInferStatement              ::=  "Option" "Infer" OnOff? EoS
+ImportsStatement                  ::=  "Imports" ImportsClauses EoS
+ImportsClauses                    ::=  ImportsClause | ( ImportsClauses Comma ImportsClause )
+ImportsClause                     ::=  ( AliasImportsClause | MembersImportsClause | XMLNamespaceImportsClause )
 AliasImportsClause                ::=	Identifier  Equals  TypeName
 MembersImportsClause              ::=	TypeName
 XMLNamespaceImportsClause         ::= '<'  XMLNamespaceAttributeName  XMLWhitespace?  Equals  XMLWhitespace?  XMLNamespaceValue  '>'
-XMLNamespaceValue                 ::=	   DoubleQuoteCharacter  XMLAttributeDoubleQuoteValueCharacter*  DoubleQuoteCharacter
-                                      |  SingleQuoteCharacter  XMLAttributeSingleQuoteValueCharacter*  SingleQuoteCharacter
-NamespaceDeclaration              ::=	"Namespace"  NamespaceName  EoS
-                                    	NamespaceMemberDeclaration*
-                                    	"End"  "Namespace"  EoS
-NamespaceName                     ::= 	RelativeNamespaceName
-                                      |	"Global"
-                                      |	"Global"  '.'   RelativeNamespaceName
-RelativeNamespaceName             ::=   	Identifier
-                                      | 	RelativeNamespaceName  Period  IdentifierOrKeyword
+XMLNamespaceValue                 ::=	  ( DoubleQuoteChar XMLAttributeDoubleQuoteValueChar* DoubleQuoteChar )
+                                      | ( SingleQuoteChar XMLAttributeSingleQuoteValueChar* SingleQuoteChar )
+NamespaceDeclaration              ::=	"Namespace" NamespaceName EoS	NamespaceMemberDeclaration*	"End" "Namespace" EoS
+NamespaceName                     ::= (	RelativeNamespaceName |	"Global" | ( "Global" '.' RelativeNamespaceName ) )
+RelativeNamespaceName             ::= 	Identifier | (	RelativeNamespaceName Period IdentifierOrKeyword )
 NamespaceMemberDeclaration        ::= 	NamespaceDeclaration  |	 TypeDeclaration
 TypeDeclaration                   ::= 	ModuleDeclaration     |  NonModuleDeclaration
-NonModuleDeclaration              ::=   EnumDeclaration
-                                      |	StructureDeclaration
-                                      |	InterfaceDeclaration
-                                      |	ClassDeclaration
-                                      |	DelegateDeclaration
+NonModuleDeclaration              ::= ( EnumDeclaration |	StructureDeclaration | InterfaceDeclaration |	ClassDeclaration | DelegateDeclaration )
 
 
 //  13.3.3    Types
@@ -310,39 +213,22 @@ NonModuleDeclaration              ::=   EnumDeclaration
 TypeName                          ::= 	ArrayTypeName      |	NonArrayTypeName
 NonArrayTypeName                  ::=	  SimpleTypeName     |	NullableTypeName
 SimpleTypeName                    ::= 	QualifiedTypeName  |	BuiltInTypeName
-QualifiedTypeName                 ::= 	Identifier  TypeArguments?
-                                      |	"Global"  Period  IdentifierOrKeyword   TypeArguments?
-                                      |	QualifiedTypeName  Period  IdentifierOrKeyword  TypeArguments?
+QualifiedTypeName                 ::= 	( Identifier TypeArguments? )
+                                      |	( "Global" Period IdentifierOrKeyword TypeArguments? ) | (	QualifiedTypeName Period IdentifierOrKeyword TypeArguments? )
 TypeArguments                     ::=	  OpenParenthesis  "Of"  TypeArgumentList  CloseParenthesis
-TypeArgumentList                  ::= 	TypeName
-                                      |	TypeArgumentList  Comma  TypeName
+TypeArgumentList                  ::= 	TypeName | ( TypeArgumentList Comma TypeName )
 BuiltInTypeName                   ::=   Object  |  PrimitiveTypeName
-TypeModifier                      ::=   AccessModifier  |  "Shadows"
-IdentifierModifiers               ::=  NullableNameModifier?  ArrayNameModifier?
-
-NullableTypeName                  ::=  NonArrayTypeName  '?'
-NullableNameModifier              ::=  '?'
-TypeImplementsClause              ::=  "Implements"  TypeImplements  EoS
-TypeImplements                    ::= 	NonArrayTypeName
-                                      |	TypeImplements  Comma  NonArrayTypeName
-PrimitiveTypeName                 ::=    NumericTypeName
-                                      |  "Boolean"
-                                      |  "Date"
-                                      |  "Char"
-                                      |  "String"
-NumericTypeName                   ::=    IntegralTypeName
-                                      |  FloatingPointTypeName
-                                      |  "Decimal"
-IntegralTypeName                  ::=    "Byte"
-                                      |  "SByte"
-                                      |  "UShort"
-                                      |  "Short"
-                                      |  "UInteger"
-                                      |  "Integer"
-                                      |  "ULong"
-                                      |  "Long"
+TypeModifier                      ::=   AccessModifier | "Shadows"
+IdentifierModifiers               ::=   NullableNameModifier? ArrayNameModifier?
+NullableTypeName                  ::=   NonArrayTypeName  '?'
+NullableNameModifier              ::=   '?'
+TypeImplementsClause              ::=   "Implements" TypeImplements EoS
+TypeImplements                    ::= 	NonArrayTypeName | ( TypeImplements Comma NonArrayTypeName )
+PrimitiveTypeName                 ::= ( NumericTypeName | "Boolean" | "Date" | "Char" | "String" )
+NumericTypeName                   ::= ( IntegralTypeName | FloatingPointTypeName | "Decimal" )
+IntegralTypeName                  ::= ( "Byte" | "SByte" | "UShort" | "Short" | "UInteger" | "Integer" | "ULong" | "Long" )
 FloatingPointTypeName             ::=  "Single"  |  "Double"
-EnumDeclaration                   ::=	 Attributes?  TypeModifier*  "Enum"  Identifier  ( "As"  NonArrayTypeName )?
+EnumDeclaration                   ::=	 Attributes? TypeModifier* "Enum" Identifier ( "As" NonArrayTypeName )?
                                        EoS
                                     	 EnumMemberDeclaration+
 	                                     "End"  "Enum"  EoS
@@ -353,11 +239,8 @@ ClassDeclaration                  ::=  Attributes?  ClassModifier*  Class  Ident
 	                                     TypeImplementsClause*
                                        ClassMemberDeclaration*
 	                                     "End"  "Class"  EoS
-ClassModifier                     ::=    TypeModifier
-                                      |  "MustInherit"
-                                      |  "NotInheritable"
-                                      |  "Partial"
-ClassBase                         ::=    "Inherits"  NonArrayTypeName  EoS
+ClassModifier                     ::=  ( TypeModifier | "MustInherit" | "NotInheritable" | "Partial" )
+ClassBase                         ::=  "Inherits" NonArrayTypeName EoS
 ClassMemberDeclaration            ::= 	 NonModuleDeclaration
                                       |	 EventMemberDeclaration
                                       |	 VariableMemberDeclaration
@@ -405,30 +288,21 @@ InterfaceMemberDeclaration        ::= 	 NonModuleDeclaration
 ArrayTypeName                     ::=  NonArrayTypeName  ArrayTypeModifiers
 ArrayTypeModifiers                ::=  ArrayTypeModifier+
 ArrayTypeModifier                 ::=  OpenParenthesis  RankList?  CloseParenthesis
-RankList                          ::= 	 Comma
-                                      |	 RankList  Comma
-ArrayNameModifier                 ::= 	 ArrayTypeModifiers
-                                      |	 ArraySizeInitializationModifier
+RankList                          ::=  Comma |( RankList Comma )
+ArrayNameModifier                 ::=  ArrayTypeModifiers | ArraySizeInitializationModifier
 DelegateDeclaration               ::=	 Attributes?  TypeModifier*  "Delegate"  MethodSignature  EoS
-MethodSignature                   ::=    SubSignature
-                                      |  FunctionSignature
+MethodSignature                   ::=  SubSignature | FunctionSignature
 
 
 //  13.3.4    Type Members
 
-ImplementsClause                  ::=  ("Implements"  ImplementsList)?
-ImplementsList                    ::= 	 InterfaceMemberSpecifier
-                                      |	 ImplementsList  Comma  InterfaceMemberSpecifier
-InterfaceMemberSpecifier          ::=    NonArrayTypeName  Period  IdentifierOrKeyword
-MethodMemberDeclaration           ::=    MethodDeclaration
-                                      |  ExternalMethodDeclaration
-InterfaceMethodMemberDeclaration  ::=    InterfaceMethodDeclaration
-MethodDeclaration                 ::=    SubDeclaration
-                                      |	 MustOverrideSubDeclaration
-                                      |	 FunctionDeclaration
-                                      |	 MustOverrideFunctionDeclaration
-InterfaceMethodDeclaration        ::=    InterfaceSubDeclaration
-                                      |	 InterfaceFunctionDeclaration
+ImplementsClause                  ::=  ( "Implements"  ImplementsList)?
+ImplementsList                    ::=  InterfaceMemberSpecifier |	( ImplementsList  Comma  InterfaceMemberSpecifier )
+InterfaceMemberSpecifier          ::=  NonArrayTypeName  Period  IdentifierOrKeyword
+MethodMemberDeclaration           ::=  MethodDeclaration | ExternalMethodDeclaration
+InterfaceMethodMemberDeclaration  ::=  InterfaceMethodDeclaration
+MethodDeclaration                 ::=  ( SubDeclaration | MustOverrideSubDeclaration | FunctionDeclaration | MustOverrideFunctionDeclaration )
+InterfaceMethodDeclaration        ::=  InterfaceSubDeclaration | InterfaceFunctionDeclaration
 SubSignature                      ::=  "Sub"  Identifier  TypeParameterList?
                                        (  OpenParenthesis  ParameterList?  CloseParenthesis)?
 FunctionSignature                 ::=  "Function"  Identifier  TypeParameterList?
@@ -470,12 +344,11 @@ ExternalFunctionDeclaration       ::=	Attributes?  ExternalMethodModifier*  "Dec
                                       ( OpenParenthesis  ParameterList?  CloseParenthesis )?
                                       ( "As"  Attributes?  TypeName)?  EoS
 
-ExternalMethodModifier            ::=  AccessModifier  |  "Shadows"  |  "Overloads"
-CharsetModifier                   ::=  "Ansi"            |  "Unicode"  |  "Auto"
+ExternalMethodModifier            ::=  ( AccessModifier | "Shadows" | "Overloads" )
+CharsetModifier                   ::=  ( "Ansi"         | "Unicode" | "Auto" )
 LibraryClause                     ::=  "Lib"  StringLiteral
 AliasClause                       ::=  "Alias"  StringLiteral
-ParameterList                     ::=    Parameter
-                                      |  ParameterList  Comma  Parameter
+ParameterList                     ::=  Parameter | ( ParameterList  Comma  Parameter )
 Parameter                         ::=	 Attributes?  ParameterModifier*  ParameterIdentifier  ( "As"  TypeName )?
 	                                  	 ( Equals  ConstantExpr )?
 ParameterModifier                 ::=  "ByVal" | "ByRef" | "Optional" | "ParamArray"
@@ -483,75 +356,49 @@ ParameterIdentifier               ::=  Identifier  IdentifierModifiers
 HandlesClause                     ::=  ( Handles  EventHandlesList)?
 EventHandlesList                  ::=	   EventMemberSpecifier
                                       |	 EventHandlesList  Comma  EventMemberSpecifier
-EventMemberSpecifier              ::=   Identifier Period  IdentifierOrKeyword
-                                      | "MyBase"   Period  IdentifierOrKeyword
-                                      |	"Me"       Period  IdentifierOrKeyword
+EventMemberSpecifier              ::= ( ( Identifier Period IdentifierOrKeyword )
+                                      | ( "MyBase" Period IdentifierOrKeyword )
+                                      | (	"Me"     Period IdentifierOrKeyword ) )
 ConstructorMemberDeclaration      ::=	Attributes?  ConstructorModifier*  "Sub"  "New"
                                    		( OpenParenthesis  ParameterList?  CloseParenthesis )?  EoL
                                       Block?
                                       "End"  "Sub"  EoS
-ConstructorModifier               ::=  AccessModifier  |  "Shared"
-EventMemberDeclaration            ::=    RegularEventMemberDeclaration
-                                      |	 CustomEventMemberDeclaration
+ConstructorModifier               ::=  AccessModifier | "Shared"
+EventMemberDeclaration            ::=  RegularEventMemberDeclaration | CustomEventMemberDeclaration
 RegularEventMemberDeclaration     ::=	 Attributes? EventModifiers*  "Event"  Identifier  ParametersOrType  ImplementsClause?  EoS
 InterfaceEventMemberDeclaration   ::=  Attributes? InterfaceEventModifiers* "Event"  Identifier  ParametersOrType  EoS
-ParametersOrType                  ::=   (  OpenParenthesis  ParameterList?  CloseParenthesis )?
-                                      | "As"  NonArrayTypeName
-EventModifiers                    ::=    AccessModifier
-                                      |  "Shadows"
-                                      |  "Shared"
+ParametersOrType                  ::=  ( OpenParenthesis  ParameterList?  CloseParenthesis )?  |  ( "As" NonArrayTypeName )
+EventModifiers                    ::=  ( AccessModifier  |  "Shadows"  |  "Shared" )
 InterfaceEventModifiers           ::=  "Shadows"
 CustomEventMemberDeclaration      ::=	  Attributes?  EventModifiers*  "Custom"  "Event"  Identifier  "As"  TypeName
                                         ImplementsClause?	EoS
 		                                    EventAccessorDeclaration+
 	                                      "End"  "Event"  EoS
-EventAccessorDeclaration          ::=     AddHandlerDeclaration
-                                       | 	RemoveHandlerDeclaration
-                                       | 	RaiseEventDeclaration
+EventAccessorDeclaration          ::=  ( AddHandlerDeclaration |	RemoveHandlerDeclaration | RaiseEventDeclaration )
 AddHandlerDeclaration             ::=	 Attributes? "AddHandler"  OpenParenthesis  ParameterList  CloseParenthesis
                                        EoL
 	                                     Block?
 	                                     "End"  "AddHandler"  EoS
-RemoveHandlerDeclaration          ::=	 Attributes?  "RemoveHandler"  OpenParenthesis  ParameterList  CloseParenthesis
-                                       EoL
-	                                     Block?
-	                                     "End"  "RemoveHandler"  EoS
-RaiseEventDeclaration             ::=	 Attributes?  "RaiseEvent"  OpenParenthesis  ParameterList  CloseParenthesis
-                                       EoL
-	                                     Block?
-	                                     "End"  "RaiseEvent"  EoS
+RemoveHandlerDeclaration          ::=	 Attributes? "RemoveHandler" OpenParenthesis ParameterList CloseParenthesis EoL Block? "End" "RemoveHandler" EoS
+RaiseEventDeclaration             ::=	 Attributes? "RaiseEvent" OpenParenthesis ParameterList CloseParenthesis EoL Block? "End" "RaiseEvent" EoS
 ConstantMemberDeclaration         ::=	 Attributes?  ConstantModifier*  "Const"  ConstantDeclarators  EoS
 ConstantModifier                  ::=  AccessModifier  |  "Shadows"
-ConstantDeclarators               ::=    ConstantDeclarator
-                                      |  ConstantDeclarators  Comma  ConstantDeclarator
+ConstantDeclarators               ::=  ConstantDeclarator  |  ( ConstantDeclarators  Comma  ConstantDeclarator )
 ConstantDeclarator                ::=  Identifier  ("As"  TypeName)?  Equals  ConstantExpr  EoS
 VariableMemberDeclaration         ::=	 Attributes?  VariableModifier+  VariableDeclarators  EoS
-VariableModifier                  ::=	    AccessModifier
-                                      | 	"Shadows"
-                                      |   "Shared"
-                                      | 	"ReadOnly"
-                                      |   "WithEvents"
-                                      | 	"Dim"
-VariableDeclarators               ::=   	VariableDeclarator
-                                      | 	VariableDeclarators  Comma  VariableDeclarator
-VariableDeclarator                ::=     VariableIdentifiers "As"  ObjectCreationExpr
-                                      |   VariableIdentifiers ("As"  TypeName)?  ( Equals  Expr)?
-VariableIdentifiers               ::=   	VariableIdentifier
-                                      |   VariableIdentifiers  Comma  VariableIdentifier
+VariableModifier                  ::=	 ( AccessModifier |	"Shadows" | "Shared" | "ReadOnly" | "WithEvents" | "Dim" )
+VariableDeclarators               ::=  VariableDeclarator  |  (	VariableDeclarators Comma VariableDeclarator )
+VariableDeclarator                ::=  ( VariableIdentifiers "As" ObjectCreationExpr ) | ( VariableIdentifiers ("As" TypeName)? ( Equals Expr)? )
+VariableIdentifiers               ::=  VariableIdentifier | ( VariableIdentifiers  Comma  VariableIdentifier )
 VariableIdentifier                ::=  Identifier  IdentifierModifiers
 ArraySizeInitializationModifier   ::=  OpenParenthesis  BoundList  CloseParenthesis  ArrayTypeModifiers?
-BoundList                         ::=  Bound  | 	( BoundList  Comma  Bound )
-Bound                             ::=  Expr  |  (	'0'  "To"  Expr )
-PropertyMemberDeclaration         ::=     RegularPropertyMemberDeclaration
-                                      | 	MustOverridePropertyMemberDeclaration
-                                      | 	AutoPropertyMemberDeclaration
+BoundList                         ::=  Bound | ( BoundList  Comma  Bound )
+Bound                             ::=  Expr  | ( '0' "To"  Expr )
+PropertyMemberDeclaration         ::= ( RegularPropertyMemberDeclaration | MustOverridePropertyMemberDeclaration | AutoPropertyMemberDeclaration )
 PropertySignature                 ::=  "Property"  Identifier  ( OpenParenthesis  ParameterList?  CloseParenthesis )? ( "As"  Attributes?  TypeName )?
-RegularPropertyMemberDeclaration  ::=  Attributes?  PropertyModifier*  PropertySignature  ImplementsClause?
-                                       EoL
-                                       PropertyAccessorDeclaration+
-	                                     "End"  "Property"  EoS
+RegularPropertyMemberDeclaration  ::=  Attributes? PropertyModifier* PropertySignature ImplementsClause? EoL PropertyAccessorDeclaration+ "End" "Property" EoS
 
-MustOverridePropertyMemberDeclaration  ::= Attributes?  MustOverridePropertyModifier+  PropertySignature  ImplementsClause?  EoS
+MustOverridePropertyMemberDeclaration  ::= Attributes? MustOverridePropertyModifier+ PropertySignature ImplementsClause? EoS
 
 AutoPropertyMemberDeclaration          ::=  Attributes?  AutoPropertyModifier*  "Property"  Identifier
 		                                        (  OpenParenthesis ParameterList?  CloseParenthesis)?
@@ -564,142 +411,100 @@ AutoPropertyMemberDeclaration          ::=  Attributes?  AutoPropertyModifier*  
                                             ObjectCreationExprInitializer?
                                             ImplementsClause?  EoL
 
-InterfacePropertyMemberDeclaration     ::=	Attributes?  InterfacePropertyModifier*  PropertySignature  EoS
-AutoPropertyModifier                   ::=  	  AccessModifier
-                                            | 	"Shadows"
-                                            | 	"Shared"
-                                            | 	"Overridable"
-                                            | 	"NotOverridable"
-                                            | 	"Overrides"
-                                            | 	"Overloads"
-PropertyModifier                      ::=     	AutoPropertyModifier
-                                            | 	"Default"
-                                            | 	"ReadOnly""
-                                            | 	"WriteOnly"
-                                            | 	"Iterator"
-MustOverridePropertyModifier          ::=   PropertyModifier  |  "MustOverride"
-InterfacePropertyModifier             ::=     	"Shadows"
-                                            | 	"Overloads"
-                                            |   "Default"
-                                            | 	"ReadOnly"
-                                            | 	"WriteOnly"
-PropertyAccessorDeclaration           ::=   PropertyGetDeclaration  |   PropertySetDeclaration
-PropertyGetDeclaration                ::= 	Attributes?  AccessModifier?  "Get"  EoL	 Block?	"End" "Get"  EoS
-PropertySetDeclaration                ::= 	Attributes?  AccessModifier?  "Set"  ( OpenParenthesis ParameterList? CloseParenthesis )?  EoL
+InterfacePropertyMemberDeclaration  ::=  Attributes?  InterfacePropertyModifier*  PropertySignature  EoS
+AutoPropertyModifier                ::=  AccessModifier | "Shadows" | "Shared" | "Overridable" | "NotOverridable" | "Overrides" | "Overloads"
+PropertyModifier                    ::=  AutoPropertyModifier |	"Default" |	"ReadOnly" | "WriteOnly" | "Iterator"
+MustOverridePropertyModifier        ::=  PropertyModifier  |  "MustOverride"
+InterfacePropertyModifier           ::=  "Shadows" | "Overloads" | "Default" | "ReadOnly" |	"WriteOnly"
+PropertyAccessorDeclaration         ::=  PropertyGetDeclaration  |   PropertySetDeclaration
+PropertyGetDeclaration              ::=  Attributes?  AccessModifier?  "Get"  EoL	 Block?	"End" "Get"  EoS
+PropertySetDeclaration              ::=  Attributes?  AccessModifier?  "Set"  ( OpenParenthesis ParameterList? CloseParenthesis )?  EoL
                                           	Block? "End" "Set"  EoS
-OperatorDeclaration                   ::= 	Attributes?  OperatorModifier*  Operator  OverloadableOperator
+OperatorDeclaration                 ::=  Attributes?  OperatorModifier*  Operator  OverloadableOperator
                                             OpenParenthesis  ParameterList  CloseParenthesis
 	                                          ( "As"  Attributes?  TypeName )? EoL
                                           	Block?
 	                                          "End"  "Operator"  EoS
-OperatorModifier                      ::=    "Public"
-                                          |  "Shared"
-                                          |  "Overloads"
-                                          |  "Shadows"
-                                          |  "Widening"
-                                          |  "Narrowing"
-OverloadableOperator                  ::=     '+' |  '-' | '*' |  '/' | '\' | '&' | "Like" | "Mod" | "And" | "Or" | "Xor" | '^'
-                                          |  "<<" | ">>" | '=' | "<>" | '>' | '<' | ">=" | "<=" | "Not" | "IsTrue" | "IsFalse" | "CType"
+OperatorModifier                    ::= ( "Public" | "Shared" | "Overloads" | "Shadows" | "Widening" | "Narrowing" )
+OverloadableOperator                ::= ( '+' | '-' | '*' | '/' | '\' | '&' | "Like" | "Mod" | "And" | "Or" | "Xor" | '^'
+                                        | "<<" | ">>" | '=' | "<>" | '>' | '<' | ">=" | "<=" | "Not" | "IsTrue" | "IsFalse" | "CType" )
 
 //  13.3.5    Statements
 
-Statement                             ::=     LabelDeclarationStatement
-                                          |   LocalDeclarationStatement
-                                          |   WithStatement
-                                          |   SyncLockStatement
-                                          |   EventStatement
-                                          | 	AssignmentStatement
-                                          | 	InvocationStatement
-                                          | 	ConditionalStatement
-                                          | 	LoopStatement
-                                          | 	ErrorHandlingStatement
-                                          | 	BranchStatement
-                                          | 	ArrayHandlingStatement
-                                          | 	UsingStatement
-                                          | 	AwaitStatement
-                                          | 	YieldStatement
+Statement                           ::= (   LabelDeclarationStatement
+                                        |   LocalDeclarationStatement
+                                        |   WithStatement
+                                        |   SyncLockStatement
+                                        |   EventStatement
+                                        | 	AssignmentStatement
+                                        | 	InvocationStatement
+                                        | 	ConditionalStatement
+                                        | 	LoopStatement
+                                        | 	ErrorHandlingStatement
+                                        | 	BranchStatement
+                                        | 	ArrayHandlingStatement
+                                        | 	UsingStatement
+                                        | 	AwaitStatement
+                                        | 	YieldStatement )
 
 Block                                 ::=  Statements*
 LabelDeclarationStatement             ::=  LabelName  ':'
 LabelName                             ::=  Identifier  |  IntLiteral
 Statements                            ::=	 Statement?  |  ( Statements  ':'  Statement? )
 LocalDeclarationStatement             ::=  LocalModifier  VariableDeclarators  EoS
-LocalModifier                         ::=  "Static"  |  "Dim"  |  "Const"
-WithStatement                         ::=  "With"  Expr  EoS  Block?  "End" "With"  EoS
+LocalModifier                         ::=  ( "Static" | "Dim" | "Const" )
+WithStatement                         ::=  "With" Expr EoS Block? "End" "With" EoS
 SyncLockStatement                     ::=  "SyncLock"  Expr  EoS	Block?  "End" "SyncLock"  EoS
-EventStatement                        ::= 	  RaiseEventStatement
-                                          |   AddHandlerStatement
-                                          |   RemoveHandlerStatement
+EventStatement                        ::= ( RaiseEventStatement | AddHandlerStatement | RemoveHandlerStatement )
 RaiseEventStatement                   ::=  "RaiseEvent"  IdentifierOrKeyword  ( OpenParenthesis  ArgumentList?  CloseParenthesis )?  EoS
 AddHandlerStatement                   ::=  "AddHandler"     Expr  Comma  Expr  EoS
 RemoveHandlerStatement                ::=  "RemoveHandler"  Expr  Comma  Expr  EoS
-AssignmentStatement                   ::=   	RegularAssignmentStatement
-                                          | 	CompoundAssignmentStatement
-                                          | 	MidAssignmentStatement
-RegularAssignmentStatement            ::=  Expr  Equals  Expr  EoS
-CompoundAssignmentStatement           ::=  Expr  CompoundBinaryOperator  EoL?  Expr  EoS
-CompoundBinaryOperator                ::=  "^=" | "*=" | "/=" | "\=" | "+=" | "-=" | "&=" | "<<=" | ">>="
+AssignmentStatement                   ::= ( RegularAssignmentStatement | CompoundAssignmentStatement | MidAssignmentStatement )
+RegularAssignmentStatement            ::=   Expr  Equals  Expr  EoS
+CompoundAssignmentStatement           ::=   Expr  CompoundBinaryOperator  EoL?  Expr  EoS
+CompoundBinaryOperator                ::=  ( "^=" | "*=" | "/=" | "\=" | "+=" | "-=" | "&=" | "<<=" | ">>=" )
 MidAssignmentStatement                ::=  "Mid" '$'?  OpenParenthesis  Expr  Comma  Expr ( Comma  Expr )?  CloseParenthesis  Equals  Expr  EoS
-InvocationStatement                   ::=   Call?  InvocationExpr  EoS
-ConditionalStatement                  ::=   IfStatement       |  SelectStatement
-IfStatement                           ::=   BlockIfStatement  |  LineIfThenStatement
-BlockIfStatement                      ::=   "If"  BooleanExpr  "Then"?  EoS  Block?  ElseIfStatement*  ElseStatement?  "End"  "If"  EoS
-ElseIfStatement                       ::= 	"ElseIf"  BooleanExpr  "Then"?  EoS  Block?
-ElseStatement                         ::= 	"Else"  EoS  Block?
-LineIfThenStatement                   ::= 	"If"  BooleanExpr  "Then"  Statements  ( "Else"  Statements )?  EoS
-SelectStatement                       ::= 	"Select"  Case?  Expr  EoS  CaseStatement*	CaseElseStatement?  "End"  "Select"  EoS
-CaseStatement                         ::= 	"Case"  CaseClauses  EoS  Block?
-CaseClauses                           ::= 	CaseClause  |  ( CaseClauses  Comma  CaseClause )
-CaseClause                            ::=   ( ( "Is"  EoL? )?  ComparisonOperator  EoL? Expr )  |  (	Expr  ( "To"  Expr )? )
-ComparisonOperator                    ::=   '=' | "<>" | '<' | '>' | ">=" | "<="
+InvocationStatement                   ::=  Call?  InvocationExpr  EoS
+ConditionalStatement                  ::=  IfStatement       |  SelectStatement
+IfStatement                           ::=  BlockIfStatement  |  LineIfThenStatement
+BlockIfStatement                      ::=  "If"  BooleanExpr  "Then"?  EoS  Block?  ElseIfStatement*  ElseStatement?  "End"  "If"  EoS
+ElseIfStatement                       ::=  "ElseIf"  BooleanExpr  "Then"?  EoS  Block?
+ElseStatement                         ::=  "Else"  EoS  Block?
+LineIfThenStatement                   ::=  "If"  BooleanExpr  "Then"  Statements  ( "Else"  Statements )?  EoS
+SelectStatement                       ::=  "Select"  Case?  Expr  EoS  CaseStatement*	CaseElseStatement?  "End"  "Select"  EoS
+CaseStatement                         ::=  "Case"  CaseClauses  EoS  Block?
+CaseClauses                           ::=  CaseClause  |  ( CaseClauses  Comma  CaseClause )
+CaseClause                            ::=  ( ( "Is"  EoL? )?  ComparisonOperator  EoL? Expr )  |  (	Expr  ( "To"  Expr )? )
+ComparisonOperator                    ::=  ( '=' | "<>" | '<' | '>' | ">=" | "<=" )
 CaseElseStatement                     ::= 	"Case"  "Else"  EoS	 Block?
-LoopStatement                         ::= 	  WhileStatement
-                                          | 	DoLoopStatement
-                                          | 	ForStatement
-                                          | 	ForEachStatement
+LoopStatement                         ::=  ( WhileStatement |	DoLoopStatement |	ForStatement | ForEachStatement )
 WhileStatement                        ::=	 "While"  BooleanExpr  EoS  Block?  "End"  "While"  EoS
 DoLoopStatement                       ::=  DoTopLoopStatement  |  DoBottomLoopStatement
 DoTopLoopStatement                    ::=	 "Do"  ( WhileOrUntil  BooleanExpr )?  EoS  Block?  "Loop"  EoS
 DoBottomLoopStatement                 ::=  "Do"  EoS  Block?  "Loop"  WhileOrUntil  BooleanExpr  EoS
 WhileOrUntil                          ::=  "While"  |  "Until"
-ForStatement                          ::=  "For"  LoopControlVariable  Equals  Expr  "To"  Expr  ( "Step" Expr )?
-                                           EoS 	Block? ( "Next" NextExprList? EoS )?
-LoopControlVariable                   ::=  ( Identifier  ( IdentifierModifiers  "As"  TypeName )? )  |  Expr
-NextExprList                          ::=  Expr  |  ( NextExprList  Comma  Expr )
+ForStatement                          ::=  "For" LoopControlVariable Equals Expr "To" Expr ( "Step" Expr )? EoS	Block? ( "Next" NextExprList? EoS )?
+LoopControlVariable                   ::=  ( Identifier ( IdentifierModifiers "As" TypeName )? )  |  Expr
+NextExprList                          ::=  Expr  | ( NextExprList Comma Expr )
 ForEachStatement                      ::=  "For"  "Each"  LoopControlVariable  "In"  EoL?  Expr  EoS  Block? ( "Next"  NextExprList?  EoS  )?
 ErrorHandlingStatement                ::=  StructuredErrorStatement  | 	UnstructuredErrorStatement
 StructuredErrorStatement              ::=  ThrowStatement  |   TryStatement
-TryStatement                          ::=  "Try"  EoS  Block?  CatchStatement*  FinallyStatement?  "End"  "Try"  EoS
+TryStatement                          ::=  "Try" EoS Block? CatchStatement* FinallyStatement? "End" "Try" EoS
 FinallyStatement                      ::=  "Finally"  EoS  Block?
 CatchStatement                        ::=  "Catch"  ( Identifier  ( "As"  NonArrayTypeName)? )?  ( "When" BooleanExpr )?  EoS  Block?
 ThrowStatement                        ::=  "Throw"  Expr?  EoS
-UnstructuredErrorStatement            ::=  ErrorStatement  |  OnErrorStatement  | 	ResumeStatement
+UnstructuredErrorStatement            ::=  ( ErrorStatement | OnErrorStatement | ResumeStatement )
 ErrorStatement                        ::=  "Error"  Expr  EoS
 OnErrorStatement                      ::=  "On"  "Error"  ErrorClause  EoS
-ErrorClause                           ::= 	  "GoTo"  "-1"
-                                          | 	"GoTo"  '0'
-                                          | 	GoToStatement
-                                          |   "Resume" "Next"
+ErrorClause                           ::=  ( ( "GoTo" "-1" ) | ( "GoTo" '0' ) |	GoToStatement | ( "Resume" "Next" ) )
 ResumeStatement                       ::=  "Resume"  ResumeClause?  EoS
 ResumeClause                          ::=  "Next"  |   LabelName
-BranchStatement                       ::=   	GoToStatement
-                                          | 	ExitStatement
-                                          | 	ContinueStatement
-                                          |   StopStatement
-                                          |   EndStatement
-                                          |   ReturnStatement
+BranchStatement                       ::= ( GoToStatement | ExitStatement | ContinueStatement | StopStatement | EndStatement | ReturnStatement )
 GoToStatement                         ::=  "GoTo"  LabelName  EoS
 ExitStatement                         ::=  "Exit"  ExitKind  EoS
-ExitKind                              ::=     "Do"
-                                          |   "For"
-                                          |   "While"
-                                          |   "Select"
-                                          |   "Sub"
-                                          |   "Function""
-                                          |   "Property"
-                                          |   "Try"
+ExitKind                              ::= ( "Do" | "For" | "While" | "Select" | "Sub" | "Function" | "Property" | "Try" )
 ContinueStatement                     ::=  "Continue"  ContinueKind  EoS
-ContinueKind                          ::=  "Do"  |  "For"  |  "While"
+ContinueKind                          ::= ( "Do" | "For" | "While" )
 StopStatement                         ::=  "Stop"  EoS
 EndStatement                          ::=  "End"  EoS
 ReturnStatement                       ::=  "Return"  Expr?  EoS
@@ -717,63 +522,37 @@ YieldStatement                        ::=  "Yield"  Exprs  EoS
 
 //  13.3.6   Exprs
 
-Expr                            ::=   	SimpleExpr
-                                          | 	TypeExpr
-                                          |   MemberAccessExpr
-                                          | 	DictionaryAccessExpr
-                                          | 	InvocationExpr
-                                          |   IndexExpr
-                                          |   NewExpr
-                                          |   CastExpr
-                                          |   OperatorExpr
-                                          |   ConditionalExpr
-                                          |   LambdaExpr
-                                          | 	QueryExpr
-                                          |   XMLLiteralExpr
-                                          |   XMLMemberAccessExpr
+Expr                            ::= (	 SimpleExpr | TypeExpr | MemberAccessExpr |	DictionaryAccessExpr | InvocationExpr | IndexExpr
+                                     | NewExpr    | CastExpr | OperatorExpr     | ConditionalExpr      | LambdaExpr     | QueryExpr
+                                     | XMLLiteralExpr        | XMLMemberAccessExpr )
 
 ConstantExpr                    ::=  Expr
-SimpleExpr                      ::=    	LiteralExpr
-                                           |  ParenthesizedExpr
-                                           |  InstanceExpr
-                                           |  SimpleNameExpr
-                                           |  AddressOfExpr
+SimpleExpr                      ::= (	LiteralExpr | ParenthesizedExpr | InstanceExpr | SimpleNameExpr | AddressOfExpr )
 LiteralExpr                     ::=  Literal
 ParenthesizedExpr               ::=  OpenParenthesis  Expr  CloseParenthesis
 InstanceExpr                    ::=  "Me"
 SimpleNameExpr                  ::=  Identifier  ( OpenParenthesis  "Of"  TypeArgumentList  CloseParenthesis )?
 AddressOfExpr                   ::=  "AddressOf"  Expr
-TypeExpr                        ::=  GetTypeExpr
-                                   |   TypeOfIsExpr
-                                   | 	IsExpr
-                                   |   GetXmlNamespaceExpr
+TypeExpr                        ::= ( GetTypeExpr | TypeOfIsExpr | IsExpr | GetXmlNamespaceExpr )
 GetTypeExpr                     ::=  "GetType"  OpenParenthesis  GetTypeTypeName  CloseParenthesis
 GetTypeTypeName                 ::=  TypeName  | 	QualifiedOpenTypeName
-QualifiedOpenTypeName           ::=  Identifier  TypeArityList?
-                                   | "Global"  Period  IdentifierOrKeyword   TypeArityList?
-                                   | QualifiedOpenTypeName  Period  IdentifierOrKeyword  TypeArityList?
+QualifiedOpenTypeName           ::=  ( Identifier TypeArityList? )
+                                   | ( "Global" Period IdentifierOrKeyword TypeArityList? )
+                                   | ( QualifiedOpenTypeName Period IdentifierOrKeyword TypeArityList? )
 TypeArityList                   ::=  '('  "Of"  CommaLis? ')'
 CommaList                       ::=  Comma  |  ( CommaList  Comma )
 TypeOfIsExpr                    ::=  "TypeOf"  Expr  "Is"  EoL?  TypeName
 IsExpr                          ::=  ( Expr  "Is"  EoL?  Expr )  |  ( Expr  "IsNot"  EoL?  Expr )
 GetXmlNamespaceExpr             ::=  GetXmlNamespace  OpenParenthesis  XMLNamespaceName?	CloseParenthesis
-MemberAccessExpr                ::=  MemberAccessBase?  Period  IdentifierOrKeyword
-                                     ( OpenParenthesis  "Of"  TypeArgumentList  CloseParenthesis )?
-MemberAccessBase                ::= 	Expr
-                                   | 	BuiltInTypeName
-                                   | 	"Global"
-                                   |  "MyClass"
-                                   |  "MyBase"
+MemberAccessExpr                ::=  MemberAccessBase? Period IdentifierOrKeyword ( OpenParenthesis "Of" TypeArgumentList CloseParenthesis )?
+MemberAccessBase                ::= (	Expr | BuiltInTypeName | "Global" | "MyClass" | "MyBase" )
 DictionaryAccessExpr            ::=  ?Expr?  '!'  IdentifierOrKeyword
 InvocationExpr                  ::=  Expr  ( OpenParenthesis  ArgumentList?  CloseParenthesis )?
-ArgumentList                    ::=   ( PositionalArgumentList )
-                                   |  ( PositionalArgumentList  Comma  NamedArgumentList )
-                                   |   NamedArgumentList
+ArgumentList                    ::= ( ( PositionalArgumentList ) | ( PositionalArgumentList Comma NamedArgumentList ) | NamedArgumentList )
 PositionalArgumentList          ::=   Expr?  |  ( PositionalArgumentList  Comma  Expr? )
-NamedArgumentList               ::=   ( IdentifierOrKeyword  ColonEquals  Expr )
-                                   |  ( NamedArgumentList  Comma  IdentifierOrKeyword  ColonEquals  Expr )
+NamedArgumentList               ::=   ( IdentifierOrKeyword ColonEquals Expr ) | ( NamedArgumentList Comma IdentifierOrKeyword ColonEquals Expr )
 IndexExpr                       ::=   Expr  OpenParenthesis  ArgumentList?  CloseParenthesis
-NewExpr                         ::=  	ObjectCreationExpr  |   ArrayExpr  |   AnonymousObjectCreationExpr
+NewExpr                         ::= (	ObjectCreationExpr | ArrayExpr | AnonymousObjectCreationExpr )
 AnonymousObjectCreationExpr     ::=   "New"  ObjectMemberInitializer
 ObjectCreationExpr              ::=   "New"  NonArrayTypeName  ( OpenParenthesis  ArgumentList?  CloseParenthesis )? ObjectCreationExprInitializer?
 ObjectCreationExprInitializer   ::=   ObjectMemberInitializer  |  ObjectCollectionInitializer
@@ -788,45 +567,25 @@ ArrayExpr                       ::=  ArrayCreationExpr  |   ArrayLiteralExpr
 ArrayCreationExpr               ::=  "New"  NonArrayTypeName  ArrayNameModifier
 
 CollectionInitializerArrayLiteralExpr  ::=  CollectionInitializer
-CastExpr                        ::=  ( "DirectCast"  OpenParenthesis  Expr  Comma  TypeName  CloseParenthesis )
-                                   | ( "TryCast"     OpenParenthesis  Expr  Comma  TypeName  CloseParenthesis )
-                                   | ( "CType"       OpenParenthesis  Expr  Comma  TypeName  CloseParenthesis )
-                                   | ( "CastTarget"  OpenParenthesis  Expr  CloseParenthesis )
+CastExpr                        ::= ( ( "DirectCast" OpenParenthesis Expr Comma TypeName CloseParenthesis )
+                                     | ( "TryCast"     OpenParenthesis Expr Comma TypeName CloseParenthesis )
+                                     | ( "CType"       OpenParenthesis Expr Comma TypeName CloseParenthesis )
+                                     | ( "CastTarget"  OpenParenthesis Expr CloseParenthesis )
+                                    )
 
-CastTarget                            ::= 	  CBool
-                                          |   CByte
-                                          |   CChar
-                                          |   CDate
-                                          |   CDec
-                                          |   CDbl
-                                          |   CInt
-                                          |   CLng
-                                          |   CObj
-                                          |   CSByte
-                                          |   CShort
-                                          | 	CSng
-                                          | 	CStr
-                                          |   CUInt
-                                          |   CULng
-                                          |   CUShort
+CastTarget                      ::= (  CBool | CByte | CChar  | CDate  | CDec | CDbl | CInt
+                                     | CLng  | CObj  | CSByte | CShort | CSng | CStr | CUInt
+                                     | CULng | CUShort
+                                    )
 
-OperatorExpr                    ::=     ArithmeticOperatorExpr
-                                          | 	RelationalOperatorExpr
-                                          | 	LikeOperatorExpr
-                                          |   ConcatenationOperatorExpr
-                                          |   ShortCircuitLogicalOperatorExpr
-                                          |   LogicalOperatorExpr
-                                          |   ShiftOperatorExpr
-                                          |   AwaitOperatorExpr
-
-ArithmeticOperatorExpr          ::=   	UnaryPlusExpr
-                                          | 	UnaryMinusExpr
-                                          |   AdditionOperatorExpr
-                                          |   SubtractionOperatorExpr
-                                          |   MultiplicationOperatorExpr
-                                          |   DivisionOperatorExpr
-                                          |   ModuloOperatorExpr
-                                          |   ExponentOperatorExpr
+OperatorExpr                    ::= (  ArithmeticOperatorExpr    | RelationalOperatorExpr          | LikeOperatorExpr
+                                     | ConcatenationOperatorExpr | ShortCircuitLogicalOperatorExpr | LogicalOperatorExpr
+                                     | ShiftOperatorExpr         | AwaitOperatorExpr
+                                    )
+ArithmeticOperatorExpr          ::= (  UnaryPlusExpr     | 	UnaryMinusExpr
+                                     | AdditionOperatorExpr | SubtractionOperatorExpr | MultiplicationOperatorExpr | DivisionOperatorExpr
+                                     | ModuloOperatorExpr   | ExponentOperatorExpr
+                                    )
 
 UnaryPlusExpr                   ::=  '+'  Expr
 UnaryMinusExpr                  ::=  '-'  Expr
@@ -838,194 +597,152 @@ FPDivisionOperatorExpr          ::=  Expr  '/' EoL?  Expr
 IntegerDivisionOperatorExpr     ::=  Expr  '\' EoL?  Expr
 ModuloOperatorExpr              ::=  Expr  "Mod"  EoL?  Expr
 ExponentOperatorExpr            ::=  Expr  '^'  EoL?  Expr
-RelationalOperatorExpr          ::=  ( Expr  '='  EoL?  Expr )
-                                   | ( Expr  "<>"  EoL?  Expr )
-                                   | ( Expr  '<'   EoL?  Expr )
-                                   | ( Expr  '>'   EoL?  Expr )
-                                   | ( Expr  "<="  EoL?  Expr )
-                                   | ( Expr  ">="  EoL?  Expr )
+RelationalOperatorExpr          ::=  (  ( Expr  '='  EoL?  Expr ) | ( Expr "<>" EoL? Expr ) | ( Expr '<'  EoL?  Expr )
+                                      | ( Expr  '>'  EoL?  Expr ) | ( Expr "<=" EoL? Expr ) | ( Expr ">=" EoL?  Expr )
+                                     )
 LikeOperatorExpr                ::=  Expr  "Like"  EoL?  Expr
 ConcatenationOperatorExpr       ::=  Expr  '&'  EoL?  Expr
-LogicalOperatorExpr             ::=  "Not"  Expr
-                                   | ( Expr  "And"  EoL?  Expr
-                                   | ( Expr  "Or"   EoL?  Expr
-                                   | ( Expr  "Xor"  EoL?  Expr
-
-ShortCircuitLogicalOperatorExpr ::= (	Expr  "AndAlso"  EoL?  Expr ) |  ( Expr "OrElse" EoL?  Expr )
-ShiftOperatorExpr               ::= ( Expr  "<<" EoL?  Expr )  | 	( Expr  ">>" EoL?  Expr )
+LogicalOperatorExpr             ::= ( ( "Not"  Expr ) | ( Expr "And" EoL? Expr ) | ( Expr "Or" EoL? Expr ) | ( Expr "Xor" EoL? Expr ) )
+ShortCircuitLogicalOperatorExpr ::= (	Expr "AndAlso" EoL? Expr ) | ( Expr "OrElse" EoL?  Expr )
+ShiftOperatorExpr               ::= ( Expr "<<" EoL? Expr ) |	( Expr ">>" EoL?  Expr )
 BooleanExpr                     ::=  Expr
 LambdaExpr                      ::=  SingleLineLambda  | 	MultiLineLambda
 SingleLineLambda                ::=  ( LambdaModifier*  "Function" (  OpenParenthesis  ParametertList? CloseParenthesis )?  Expr )
                                    | ( LambdaModifier*  "Sub"      (  OpenParenthesis  ParametertList? CloseParenthesis )?  Statement )
 MultiLineLambda                 ::=  MultiLineFunctionLambda  | 	MultiLineSubLambda
-MultiLineFunctionLambda         ::=  LambdaModifier*  "Function"   ( OpenParenthesis  ParametertList?  CloseParenthesis )?
-                                     ( "As"  TypeName )?  EoL  Block  "End"  "Function"
+MultiLineFunctionLambda         ::=  LambdaModifier* "Function" ( OpenParenthesis ParametertList? CloseParenthesis )?
+                                     ( "As" TypeName )? EoL Block "End" "Function"
 MultiLineSubLambda              ::=	 LambdaModifier*
                                      "Sub"  ( OpenParenthesis  ParametertList?  CloseParenthesis )?  EoL  Block  "End"  "Sub""
-LambdaModifier                  ::=  "Async"  |  "Iterator"
-QueryExpr                       ::=  FromOrAggregateQueryOperator  |  ( QueryExpr  QueryOperator )
+LambdaModifier                  ::=  "Async" | "Iterator"
+QueryExpr                       ::=  FromOrAggregateQueryOperator | ( QueryExpr QueryOperator )
 FromOrAggregateQueryOperator    ::=  FromQueryOperator  |  AggregateQueryOperator
 JoinOrGroupJoinQueryOperator    ::=  JoinQueryOperator  |  GroupJoinQueryOperator
-QueryOperator                   ::=  FromQueryOperator
-                                   | AggregateQueryOperator
-                                   | SelectQueryOperator
-                                   | DistinctQueryOperator
-                                   | WhereQueryOperator
-                                   | OrderByQueryOperator
-                                   | PartitionQueryOperator
-                                   | LetQueryOperator
-                                   | GroupByQueryOperator
-                                   | JoinOrGroupJoinQueryOperator
-
+QueryOperator                   ::= (  FromQueryOperator    | AggregateQueryOperator | SelectQueryOperator    | DistinctQueryOperator
+                                     | WhereQueryOperator   | OrderByQueryOperator   | PartitionQueryOperator | LetQueryOperator
+                                     | GroupByQueryOperator | JoinOrGroupJoinQueryOperator
+                                    )
 CollectionRangeVariableDeclarationList ::=	CollectionRangeVariableDeclaration
-                                          |  ( CollectionRangeVariableDeclarationList  Comma CollectionRangeVariableDeclaration )
+                                          | ( CollectionRangeVariableDeclarationList Comma CollectionRangeVariableDeclaration )
 
-CollectionRangeVariableDeclaration     ::=  Identifier  ( "As"  TypeName )?  "In"  EoL?  Expr
-ExprRangeVariableDeclarationList       ::=  ExprRangeVariableDeclaration  |  ( ExprRangeVariableDeclarationList  Comma  ExprRangeVariableDeclaration )
-ExprRangeVariableDeclaration           ::= 	Identifier  ( "As"  TypeName )?  Equals  Expr
-FromQueryOperator                      ::= 	EoL? "From"  EoL? CollectionRangeVariableDeclarationList
-JoinQueryOperator                      ::=  EoL? "Join"  EoL? CollectionRangeVariableDeclaration
-		                                        JoinOrGroupJoinQueryOperator?  EoL?  "On"  EoL?  JoinConditionList
-JoinConditionList                      ::=  JoinCondition  | 	( JoinConditionList  "And" EoL?  JoinCondition )
-JoinCondition                          ::=  Expr  Equals  EoL?  Expr
-LetQueryOperator                       ::=  EoL?  "Let"  EoL? ExprRangeVariableDeclarationList
-SelectQueryOperator                    ::=  EoL?  "Select" EoL?  ExprRangeVariableDeclarationList
-DistinctQueryOperator                  ::=  EoL?  "Distinct" EoL?
-WhereQueryOperator                     ::=  EoL?  "Where"  EoL?  BooleanExpr
-PartitionQueryOperator                 ::=  	( EoL?  "Take"          EoL?  Expr )
-                                           | 	( EoL?  "Take"  "While" EoL?  BooleanExpr )
-                                           |	( EoL?  "Skip"          EoL?  Expr )
-                                           |  ( EoL?  "Skip"  "While" EoL?  BooleanExpr )
-OrderByQueryOperator                   ::=  	( EoL?  "Order"  "By"   EoL?  OrderExprList )
-OrderExprList                          ::=  OrderExpr  |	( OrderExprList  Comma  OrderExpr )
-OrderExpr                              ::= 	Expr  Ordering?
-Ordering                               ::=  "Ascending"  |  "Descending"
-GroupByQueryOperator                   ::=	EoL?  "Group""
-                                            ( EoL?  ExprRangeVariableDeclarationList )?
-                                        		( EoL?  "By"  EoL? )
+CollectionRangeVariableDeclaration ::=  Identifier  ( "As"  TypeName )?  "In"  EoL?  Expr
+ExprRangeVariableDeclarationList   ::=  ExprRangeVariableDeclaration  |  ( ExprRangeVariableDeclarationList  Comma  ExprRangeVariableDeclaration )
+ExprRangeVariableDeclaration       ::= 	Identifier  ( "As"  TypeName )?  Equals  Expr
+FromQueryOperator                  ::= 	EoL? "From"  EoL? CollectionRangeVariableDeclarationList
+JoinQueryOperator                  ::=  EoL? "Join"  EoL? CollectionRangeVariableDeclaration
+		                                    JoinOrGroupJoinQueryOperator?  EoL?  "On"  EoL?  JoinConditionList
+JoinConditionList                  ::=  JoinCondition  | 	( JoinConditionList  "And" EoL?  JoinCondition )
+JoinCondition                      ::=  Expr  Equals  EoL?  Expr
+LetQueryOperator                   ::=  EoL?  "Let"  EoL? ExprRangeVariableDeclarationList
+SelectQueryOperator                ::=  EoL?  "Select" EoL?  ExprRangeVariableDeclarationList
+DistinctQueryOperator              ::=  EoL?  "Distinct" EoL?
+WhereQueryOperator                 ::=  EoL?  "Where"  EoL?  BooleanExpr
+PartitionQueryOperator             ::= ( 	( EoL? "Take"         EoL? Expr )
+                                        |	( EoL? "Take" "While" EoL? BooleanExpr )
+                                        |	( EoL? "Skip"         EoL? Expr )
+                                        | ( EoL? "Skip" "While" EoL? BooleanExpr )
+                                       )
+OrderByQueryOperator               ::=  ( EoL? "Order" "By"   EoL? OrderExprList )
+OrderExprList                      ::=  OrderExpr  |	( OrderExprList  Comma  OrderExpr )
+OrderExpr                          ::= 	Expr  Ordering?
+Ordering                           ::=  "Ascending"  |  "Descending"
+GroupByQueryOperator               ::=	EoL? "Group"
+                                            ( EoL? ExprRangeVariableDeclarationList )?
+                                        		( EoL? "By" EoL? )
                                             ExprRangeVariableDeclarationList
-		                                        ( EoL?  "Into"  EoL? )
+		                                        ( EoL? "Into" EoL? )
                                             ExprRangeVariableDeclarationList
-AggregateQueryOperator                 ::=  EoL?  "Aggregate"  EoL?  CollectionRangeVariableDeclaration
-	                                        	QueryOperator*
-	                                         	EoL?  "Into"  EoL?
-                                            ExprRangeVariableDeclarationList
+AggregateQueryOperator            ::= EoL? "Aggregate" EoL? CollectionRangeVariableDeclaration	QueryOperator* EoL? "Into" EoL? ExprRangeVariableDeclarationList
 
-GroupJoinQueryOperator                 ::=	EoL? "Group"  "Join" EoL?  CollectionRangeVariableDeclaration
-		                                        JoinOrGroupJoinQueryOperator?  EoL?  "On"  EoL?  JoinConditionList EoL? "Into"  EoL?
-                                            ExprRangeVariableDeclarationList
-ConditionalExpr                        ::=   ( "If"  OpenParenthesis  BooleanExpr  Comma  Expr  Comma  Expr  CloseParenthesis )
-                                           | ( "If"  OpenParenthesis  Expr  Comma  Expr  CloseParenthesis )
-XMLLiteralExpr                         ::= 	XMLDocument
-                                          | XMLElement
-                                          |	XMLProcessingInstruction
-                                          |	XMLComment
-                                          |	XMLCDATASection
-XMLCharacter                           ::=    !< Unicode tab character (0x0009) >!
-                                           |	!< Unicode linefeed character (0x000A) >!
-                                           |	!< Unicode carriage return character (0x000D) >!
-                                           |	!< Unicode characters 0x0020 – 0xD7FF >!
-                                           |	!< Unicode characters 0xE000 – 0xFFFD >!
-                                           |	!< Unicode characters 0x10000 – 0x10FFFF >!
-XMLString                              ::=  XMLCharacter+
-XMLWhitespace                          ::=  XMLWhitespaceCharacter+
-XMLWhitespaceCharacter                 ::=    !< Unicode carriage return character (0x000D) >!
-                                           |	!< Unicode linefeed character (0x000A) >!
-                                           |	!< Unicode space character (0x0020) >!
-                                           |	!< Unicode tab character (0x0009) >!
-XMLNameCharacter                       ::=    XMLLetter
-                                           |  XMLDigit
-                                           |  '.'
-                                           |  '-'
-                                           |  '_'
-                                           |  ':'
-                                           |  XMLCombiningCharacter
-                                           |  XMLExtender
-
-XMLNameStartCharacter                  ::=    XMLLetter
-                                           |  '_'
-                                           |  ':'
-
-XMLName                        ::=    XMLNameStartCharacter  XMLNameCharacter*
-XMLLetter                      ::=  !< Unicode character as defined in the Letter production of the XML 1.0 specification >!
-XMLDigit                       ::=  !< Unicode character as defined in the Digit production of the XML 1.0 specification >!
-XMLCombiningCharacter          ::=  !< Unicode character as defined in the CombiningChar production of the XML 1.0 specification >!
-XMLExtender                    ::=	!< Unicode character as defined in the Extender production of the XML 1.0 specification >!
-XMLEmbeddedExpr                ::=  "<%=" EoL?  Expr  EoL? "%>"
-XMLDocument                    ::=	XMLDocumentPrologue  XMLMisc*  XMLDocumentBody  XMLMisc*
-XMLDocumentPrologue            ::=  "<?xml"  XMLVersion  XMLEncoding?  XMLStandalone?  XMLWhitespace? "?>"
-XMLVersion                     ::= 	XMLWhitespace  "version"  XMLWhitespace? '=' XMLWhitespace?  XMLVersionNumberValue
-XMLVersionNumberValue          ::=    ( SingleQuoteCharacter  '1'  '.'  '0'  SingleQuoteCharacter )
-                                   |  ( DoubleQuoteCharacter  '1'  '.'  '0'  DoubleQuoteCharacter )
-XMLEncoding                    ::=  	XMLWhitespace  "encoding"  XMLWhitespace?  '='  XMLWhitespace?  XMLEncodingNameValue
-XMLEncodingNameValue           ::=    (  SingleQuoteCharacter  XMLEncodingName  SingleQuoteCharacter )
-                                   |  (  DoubleQuoteCharacter  XMLEncodingName  DoubleQuoteCharacter )
-XMLEncodingName                ::=  XMLLatinAlphaCharacter  XMLEncodingNameCharacter*
-XMLEncodingNameCharacter       ::=    XMLUnderscoreCharacter
-                                   |	XMLLatinAlphaCharacter
-                                   |  XMLNumericCharacter
-                                   |  XMLPeriodCharacter
-                                   |  XMLDashCharacter
-XMLLatinAlphaCharacter         ::=  !< Unicode Latin alphabetic character (0x0041-0x005a, 0x0061-0x007a) >!
-XMLNumericCharacter            ::=  !< Unicode digit character (0x0030-0x0039) >!
-XMLHexNumericCharacter         ::=  	XMLNumericCharacter
-                                   |  !< Unicode Latin hex alphabetic character (0x0041-0x0046, 0x0061-0x0066) >!
-XMLPeriodCharacter             ::=  !< Unicode period character (0x002e) >!
-XMLUnderscoreCharacter         ::=  !< Unicode underscore character (0x005f) >!
-XMLDashCharacter               ::=  !< Unicode dash character (0x002d) >!
-XMLStandalone                  ::=  XMLWhitespace  "standalone"  XMLWhitespace? '='  XMLWhitespace?  XMLYesNoValue
-XMLYesNoValue                  ::=  	( SingleQuoteCharacter  XMLYesNo  SingleQuoteCharacter )
-                                   |  ( DoubleQuoteCharacter  XMLYesNo  DoubleQuoteCharacter )
-XMLYesNo                       ::=    "yes" |  "no"
-XMLMisc                        ::=  XMLComment  |	XMLProcessingInstruction  |  XMLWhitespace
-XMLDocumentBody                ::=  XMLElement  |  XMLEmbeddedExpr
-XMLElement                     ::= 	XMLEmptyElement  |	( XMLElementStart  XMLContent  XMLElementEnd )
-XMLEmptyElement                ::=  '<'  XMLQualifiedNameOrExpr  XMLAttribute*  XMLWhitespace?  "/>""
-XMLElementStart                ::=  '<'  XMLQualifiedNameOrExpr  XMLAttribute*  XMLWhitespace?  '>'
-XMLElementEnd                  ::=  "</>"  |  ( "</" XMLQualifiedName  XMLWhitespace? '>' )
-XMLContent                     ::=  XMLCharacterData? ( XMLNestedContent  XMLCharacterData?  )+
-XMLCharacterData               ::=  !< Any XMLCharacterDataString that does not contain the string "]]>" >!
-XMLCharacterDataString         ::=  ( !< Any Unicode character except < or & >! ) +
-XMLNestedContent               ::=  	XMLElement
-                                   |	XMLReference
-                                   |  XMLCDATASection
-                                   |	XMLProcessingInstruction
-                                   | 	XMLComment
-                                   |	XMLEmbeddedExpr
-XMLAttribute                   ::=   ( XMLWhitespace  XMLAttributeName  XMLWhitespace?  '='  XMLWhitespace?  XMLAttributeValue )
-                                  | ( XMLWhitespace  XMLEmbeddedExpr )
-XMLAttributeName               ::=  	XMLQualifiedNameOrExpr  | 	XMLNamespaceAttributeName
-XMLAttributeValue              ::=  	DoubleQuoteCharacter  XMLAttributeDoubleQuoteValueCharacter*  DoubleQuoteCharacter
-                                   |	SingleQuoteCharacter  XMLAttributeSingleQuoteValueCharacter*  SingleQuoteCharacter
-                                   |	XMLEmbeddedExpr
-
-XMLAttributeDoubleQuoteValueCharacter  ::=  !< Any XMLCharacter except <, &, or DoubleQuoteCharacter >!  | 	XMLReference
-XMLAttributeSingleQuoteValueCharacter  ::=  !< Any XMLCharacter except <, &, or SingleQuoteCharacter >!  |	XMLReference
-XMLReference                           ::=  XMLEntityReference  |  XMLCharacterReference
-XMLEntityReference                     ::=  '&'  XMLEntityName  ';'
-XMLEntityName                          ::=  "lt"  |  "gt"  |  "amp"  |  "apos"  |  "quot"
-XMLCharacterReference                  ::=  "&#"  XMLNumericCharacter+  ';'  |	"&#x" XMLHexNumericCharacter+ ';'
-XMLNamespaceAttributeName              ::=    XMLPrefixedNamespaceAttributeName  |	XMLDefaultNamespaceAttributeName
-XMLPrefixedNamespaceAttributeName      ::=	"xmlns"  ':'  XMLNamespaceName
-XMLDefaultNamespaceAttributeName       ::=	"xmlns"
-XMLNamespaceName                       ::=  XMLNamespaceNameStartCharacter  ( XMLNamespaceNameCharacter+ )?
-XMLNamespaceNameStartCharacter         ::=	!< Any XMLNameCharacter except :  >!
-XMLNamespaceNameCharacter              ::=  XMLLetter  |  '_'
-XMLQualifiedNameOrExpr                 ::=  XMLQualifiedName   |  XMLEmbeddedExpr
-XMLQualifiedName                       ::=  XMLPrefixedName    |	 XMLUnprefixedName
-XMLPrefixedName                        ::=  XMLNamespaceName  ':'  XMLNamespaceName
-XMLUnprefixedName                      ::=  XMLNamespaceName
-XMLProcessingInstruction               ::=	"<?"  XMLProcessingTarget  ( XMLWhitespace  XMLProcessingValue? )?  "?>"
-XMLProcessingTarget                    ::=	!< Any XMLName except a casing permutation of the string "xml" >!
-XMLProcessingValue                     ::=	!< Any XMLString that does not contain the string "?>" >!
-XMLComment                             ::=	"<!--"  ( XMLCommentCharacter+ )?  "-->"
-XMLCommentCharacter                    ::=  !< Any XMLCharacter except dash (0x002D) >!  |	( '-'  !< Any XMLCharacter except dash (0x002D) >! )
-XMLCDATASection                        ::=	"<![CDATA["  XMLCDATASectionString?  "]]>"
-XMLCDATASectionString                  ::=	!< Any XMLString that does not contain the string "]]>" >!
-XMLMemberAccessExpr                    ::=  Expr  '.'  EoL?  '<'  XMLQualifiedName '>'
-                                          |	Expr  '.'  EoL?  '@'  EoL?  '<'  XMLQualifiedName '>'
-                                          |	Expr  '.'  EoL?  '@'  EoL?  IdentifierOrKeyword
-                                          |	Expr  "..."  EoL?  '<'  XMLQualifiedName  '>'
-AwaitOperatorExpr                      ::=  "Await"  Expr
-
+GroupJoinQueryOperator            ::=	EoL? "Group"  "Join" EoL?  CollectionRangeVariableDeclaration
+		                                  JoinOrGroupJoinQueryOperator?  EoL?  "On"  EoL?  JoinConditionList EoL? "Into"  EoL?
+                                      ExprRangeVariableDeclarationList
+ConditionalExpr                   ::=   ( "If"  OpenParenthesis  BooleanExpr  Comma  Expr  Comma  Expr  CloseParenthesis )
+                                      | ( "If"  OpenParenthesis  Expr  Comma  Expr  CloseParenthesis )
+XMLLiteralExpr                    ::= ( XMLDocument | XMLElement |	XMLProcessingInstruction | XMLComment |	XMLCDATASection )
+XMLChar                           ::= ( !< Unicode tab Char (0x0009) >!
+                                       |	!< Unicode linefeed Char (0x000A) >!
+                                       |	!< Unicode carriage return Char (0x000D) >!
+                                       |	!< Unicode Chars 0x0020 – 0xD7FF >!
+                                       |	!< Unicode Chars 0xE000 – 0xFFFD >!
+                                       |	!< Unicode Chars 0x10000 – 0x10FFFF >!
+                                      )
+XMLString                         ::=  XMLChar+
+XMLWhitespace                     ::=  XMLWhitespaceChar+
+XMLWhitespaceChar                 ::= (  !< Unicode carriage return Char (0x000D) >!
+                                       | !< Unicode linefeed Char (0x000A) >!
+                                       | !< Unicode space Char (0x0020) >!
+                                       | !< Unicode tab Char (0x0009) >!
+                                      )
+XMLNameChar                       ::= ( XMLLetter | XMLDigit | '.' | '-' | '_' | ':' | XMLCombiningChar | XMLExtender )
+XMLNameStartChar                  ::= ( XMLLetter | '_' | ':' )
+XMLName                           ::=    XMLNameStartChar  XMLNameChar*
+XMLLetter                         ::=  !< Unicode Char as defined in the Letter production of the XML 1.0 specification >!
+XMLDigit                          ::=  !< Unicode Char as defined in the Digit production of the XML 1.0 specification >!
+XMLCombiningChar                  ::=  !< Unicode Char as defined in the CombiningChar production of the XML 1.0 specification >!
+XMLExtender                       ::=	!< Unicode Char as defined in the Extender production of the XML 1.0 specification >!
+XMLEmbeddedExpr                   ::= "<%=" EoL? Expr EoL? "%>"
+XMLDocument                       ::=	XMLDocumentPrologue  XMLMisc*  XMLDocumentBody  XMLMisc*
+XMLDocumentPrologue               ::= "<?xml"  XMLVersion  XMLEncoding?  XMLStandalone?  XMLWhitespace? "?>"
+XMLVersion                        ::= XMLWhitespace  "version"  XMLWhitespace? '=' XMLWhitespace?  XMLVersionNumberValue
+XMLVersionNumberValue             ::= ( SingleQuoteChar '1' '.' '0' SingleQuoteChar ) | ( DoubleQuoteChar '1' '.' '0' DoubleQuoteChar )
+XMLEncoding                       ::= XMLWhitespace "encoding" XMLWhitespace? '=' XMLWhitespace? XMLEncodingNameValue
+XMLEncodingNameValue              ::= ( SingleQuoteChar XMLEncodingName SingleQuoteChar ) | ( DoubleQuoteChar XMLEncodingName DoubleQuoteChar )
+XMLEncodingName                   ::= XMLLatinAlphaChar  XMLEncodingNameChar*
+XMLEncodingNameChar               ::= ( XMLUnderscoreChar |	XMLLatinAlphaChar | XMLNumericChar | XMLPeriodChar | XMLDashChar )
+XMLLatinAlphaChar                 ::= !< Unicode Latin alphabetic Char (0x0041-0x005a, 0x0061-0x007a) >!
+XMLNumericChar                    ::= !< Unicode digit Char (0x0030-0x0039) >!
+XMLHexNumericChar                 ::= 	XMLNumericChar
+                                     |  !< Unicode Latin hex alphabetic Char (0x0041-0x0046, 0x0061-0x0066) >!
+XMLPeriodChar                     ::=  !< Unicode period Char (0x002e) >!
+XMLUnderscoreChar                 ::=  !< Unicode underscore Char (0x005f) >!
+XMLDashChar                       ::=  !< Unicode dash Char (0x002d) >!
+XMLStandalone                     ::=  XMLWhitespace  "standalone"  XMLWhitespace? '='  XMLWhitespace?  XMLYesNoValue
+XMLYesNoValue                     ::=	( SingleQuoteChar XMLYesNo SingleQuoteChar ) | ( DoubleQuoteChar XMLYesNo DoubleQuoteChar )
+XMLYesNo                          ::=  "yes" | "no"
+XMLMisc                           ::= ( XMLComment | XMLProcessingInstruction | XMLWhitespace )
+XMLDocumentBody                   ::=  XMLElement  |  XMLEmbeddedExpr
+XMLElement                        ::=  XMLEmptyElement  |	( XMLElementStart  XMLContent  XMLElementEnd )
+XMLEmptyElement                   ::=  '<' XMLQualifiedNameOrExpr XMLAttribute* XMLWhitespace? "/>""
+XMLElementStart                   ::=  '<' XMLQualifiedNameOrExpr XMLAttribute* XMLWhitespace? '>'
+XMLElementEnd                     ::=  "</>" | ( "</" XMLQualifiedName  XMLWhitespace? '>' )
+XMLContent                        ::=  XMLCharData? ( XMLNestedContent  XMLCharData?  )+
+XMLCharData                       ::=  !< Any XMLCharDataString that does not contain the string "]]>" >!
+XMLCharDataString                 ::=  ( !< Any Unicode Char except < or & >! ) +
+XMLNestedContent                  ::= (	XMLElement | XMLReference | XMLCDATASection |	XMLProcessingInstruction | XMLComment |	XMLEmbeddedExpr )
+XMLAttribute                      ::= ( XMLWhitespace XMLAttributeName XMLWhitespace? '=' XMLWhitespace? XMLAttributeValue ) | ( XMLWhitespace XMLEmbeddedExpr )
+XMLAttributeName                  ::= XMLQualifiedNameOrExpr |	XMLNamespaceAttributeName
+XMLAttributeValue                 ::= (  ( DoubleQuoteChar XMLAttributeDoubleQuoteValueChar* DoubleQuoteChar )
+                                       | ( SingleQuoteChar XMLAttributeSingleQuoteValueChar* SingleQuoteChar )
+                                       | XMLEmbeddedExpr
+                                      )
+XMLAttributeDoubleQuoteValueChar  ::=  !< Any XMLChar except <, &, or DoubleQuoteChar >!  | XMLReference
+XMLAttributeSingleQuoteValueChar  ::=  !< Any XMLChar except <, &, or SingleQuoteChar >!  |	XMLReference
+XMLReference                      ::=  XMLEntityReference  |  XMLCharReference
+XMLEntityReference                ::=  '&'  XMLEntityName  ';'
+XMLEntityName                     ::=  ( "lt" | "gt" | "amp" | "apos" | "quot" )
+XMLCharReference                  ::=  ( "&#"  XMLNumericChar+  ';' ) | (	"&#x" XMLHexNumericChar+ ';' )
+XMLNamespaceAttributeName         ::=  XMLPrefixedNamespaceAttributeName  |	XMLDefaultNamespaceAttributeName
+XMLPrefixedNamespaceAttributeName ::=	 "xmlns"  ':'  XMLNamespaceName
+XMLDefaultNamespaceAttributeName  ::=	 "xmlns"
+XMLNamespaceName                  ::=  XMLNamespaceNameStartChar  ( XMLNamespaceNameChar+ )?
+XMLNamespaceNameStartChar         ::=	 !< Any XMLNameChar except :  >!
+XMLNamespaceNameChar              ::=  XMLLetter  |  '_'
+XMLQualifiedNameOrExpr            ::=  XMLQualifiedName   |  XMLEmbeddedExpr
+XMLQualifiedName                  ::=  XMLPrefixedName    |	 XMLUnprefixedName
+XMLPrefixedName                   ::=  XMLNamespaceName  ':'  XMLNamespaceName
+XMLUnprefixedName                 ::=  XMLNamespaceName
+XMLProcessingInstruction          ::=	"<?"  XMLProcessingTarget  ( XMLWhitespace  XMLProcessingValue? )?  "?>"
+XMLProcessingTarget               ::=	!< Any XMLName except a casing permutation of the string "xml" >!
+XMLProcessingValue                ::=	!< Any XMLString that does not contain the string "?>" >!
+XMLComment                        ::=	"<!--"  ( XMLCommentChar+ )?  "-->"
+XMLCommentChar                    ::=  !< Any XMLChar except dash (0x002D) >!  |	( '-'  !< Any XMLChar except dash (0x002D) >! )
+XMLCDATASection                   ::=	"<![CDATA["  XMLCDATASectionString?  "]]>"
+XMLCDATASectionString             ::=	!< Any XMLString that does not contain the string "]]>" >!
+XMLMemberAccessExpr               ::= (  ( Expr '.' EoL? '<' XMLQualifiedName '>' )
+                                       | ( Expr '.' EoL? '@' EoL? '<' XMLQualifiedName '>' )
+                                       | ( Expr '.' EoL? '@' EoL? IdentifierOrKeyword )
+                                       | ( Expr "..." EoL? '<' XMLQualifiedName '>' )
+                                      )
+AwaitOperatorExpr                 ::=  "Await"  Expr
 }
