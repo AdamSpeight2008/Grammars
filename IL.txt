@@ -30,16 +30,17 @@ compQstring ::= QSTRING | ( compQstring '+' QSTRING )
 slashedName ::= ( dottedName | ( slashedName '/' dottedName ) )
 
 // Class Refencing
-className ::= dottedName? slashedName
-| mdtoken? slashedName
-| '*'? slashedName
-| ( ".module" dottedName )? slashedName
-| slashedName
-| mdtoken
-| TYPEDEF_T
-| ".this"
-| ".base"
-| ".nester"
+className ::= (  ( dottedName? slashedName )
+               | ( mdtoken? slashedName )
+               | ( '*'? slashedName )
+               | ( ( ".module" dottedName )? slashedName )
+               | slashedName
+               | mdtoken
+               | TYPEDEF_T
+               | ".this"
+               | ".base"
+               | ".nested"
+              )
 classNameSeq ::= ( className classNameSeq )?
 
 // Module-Level Declarations
@@ -47,9 +48,9 @@ PROGRAM ::= decls
   decls ::= decl*
    decl ::= (  moduleParamDecl
              | manifestDecl
-             | classHead '{' classDecls '}'
-             | ".namespace" dottedName '{' decls '}' /* obsolete */
-             | methodHead methodDecls '}'
+             | ( classHead '{' classDecls '}' )
+             | ( ".namespace" dottedName '{' decls '}' ) /* obsolete */
+             | ( methodHead methodDecls '}' )
              | fieldDecl
              | dataDecl
              | extSourceSpec
@@ -72,12 +73,12 @@ compControl ::= ( | ( "#define" dottedName )
                   | ';'
                 )
 // Module Parameter Declaration
-moduleParamDecl ::= (  ".subsystem" int32
-                     | ".corflags" int32
-                     | ".file" "alignment" int32
-                     | ".imagebase" int64
-                     | ".stackreserve" int64
-                     | ".typelist" '{' classNameSeq '}'
+moduleParamDecl ::= (  ( ".subsystem" int32 )
+                     | ( ".corflags" int32 )
+                     | ( ".file" "alignment" int32 )
+                     | ( ".imagebase" int64 )
+                     | ( ".stackreserve" int64 )
+                     | ( ".typelist" '{' classNameSeq '}' )
                      | ".mscorlib"
                      | vtableDecl // deprecated, use .vtfixup instead
                      | vtfixupDecl
@@ -100,8 +101,8 @@ vtableDecl ::= ".vtable" '=' '(' bytes ')'
 manifestDecl ::= (  ".module"
                   | ( ".module" dottedName )
                   | ( ".module" "extern" dottedName )
-                  | assemblyHead    '{' assemblyDecls    '}'
-                  | assemblyRefHead '{' assemblyRefDecls '}'
+                  | ( assemblyHead    '{' assemblyDecls    '}' )
+                  | ( assemblyRefHead '{' assemblyRefDecls '}' )
                   | fileDecl
                   | exptypeHead     '{' exptypeDecls     '}'
                   | manifestResHead '{' manifestResDecls '}'
@@ -111,7 +112,7 @@ manifestDecl ::= (  ".module"
 assemblyHead ::= ".assembly" asmAttrs dottedName
 asmAttrs ::= asmAttr*
  asmAttr ::= (  "retargetable"
-              | "legacy" "library" /* for backward compatibility only */
+              | ( "legacy" "library" ) /* for backward compatibility only */
               | "cil"
               | "x86"
               | "ia64"
@@ -135,7 +136,7 @@ asmOrRefDecl ::= (  ( ".publickey" '=' '(' bytes ')' )
 assemblyRefDecls ::= assemblyRefDecl*
  assemblyRefDecl ::= (  (".hash" '=' '(' bytes ')' )
                       | asmOrRefDecl
-                      | ".publickeytoken" '=' '(' bytes ')'
+                      | ( ".publickeytoken" '=' '(' bytes ')' )
                       | "auto"
       fileDecl ::=  ( ".file" fileAttr dottedName fileEntry ".hash =" '(' bytes ')' fileEntry )
                    | ( ".file" fileAttr dottedName fileEntry )
@@ -145,11 +146,7 @@ assemblyRefDecls ::= assemblyRefDecl*
      exptAttrs ::= exprAttr*
 nestedExptAttr ::= "nested"
                    ( "public" | "private" | "family" | "assembly" | "famandassem" | "famorassem" )
-      exptAttr ::= (  "private"
-                    | "public"
-                    | "forwarder"
-                    | nestedExptAttr
-                   )
+      exptAttr ::= ( "private" | "public" | "forwarder" | nestedExptAttr )
 exptypeDecls ::= exptypeDecl*
 exptypeDecl ::= (  ( ".file" dottedName )
                  | ( ".class" "extern" slashedName )
@@ -159,7 +156,7 @@ exptypeDecl ::= (  ( ".file" dottedName )
                  | customAttrDecl
                  | compControl
                 )
-manifestResHead ::=  ( ".mresource" manresAttr dottedName
+manifestResHead ::=  ( ".mresource" manresAttr dottedName )
                    | ( ".mresource" manresAttrs dottedName "as" dottedName )
      manresAttrs ::= manresAttr*
       manresAttr ::= "public" | "private"
@@ -198,14 +195,7 @@ type ::= (  ( "class" className )
           | ( "..." type )
          )
 
-simpleType ::= (  "char"
-                | "string"
-                | "bool"
-                | intType
-                | "float32"
-                | "float64"
-                | TYPEDEF_TS
-               )
+simpleType ::= ( "char" | "string" | "bool"  | intType | "float32" | "float64" | TYPEDEF_TS )
 intType ::= (  "int8"
              | "int16"
              | "int32"
@@ -227,8 +217,8 @@ bounds ::= bound ( ',' bound )*
             | ( int32 "..." )
            )
 typeSpec ::= (   className
-              | ( '[' dottedName ']' )
-              | ( '[' ".module" dottedName ']' )
+              | ( dottedName?' )
+              | ( ".module" dottedName )?
               | type
              )
 
@@ -236,8 +226,8 @@ typeSpec ::= (   className
 nativeType ::=(
                | ( "custom" '(' compQstring ',' compQstring ',' compQstring ',' compQstring ')' )
                | ( "custom" '(' compQstring ',' compQstring ')' )
-               | ( "fixed" "sysstring" '[' int32 ']' )
-               | ( "fixed" "array" '[' int32 ']' nativeType )
+               | ( "fixed" "sysstring" int32? )
+               | ( "fixed" "array" int32? nativeType )
                | "variant"
                | "currency"
                | "syschar"
@@ -247,11 +237,11 @@ nativeType ::=(
                | "float32"
                | "float64"
                | "error"
-               | ( nativeType '*' )
-               | ( nativeType '[' ']' )
-               | ( nativeType '[' int32 ']' )
-               | ( nativeType '[' int32 '+' int32 ']' )
-               | ( nativeType '[' '+' int32 ']' )
+               |   nativeType*
+               | ( nativeType? )
+               | ( nativeType  int32? )
+               | ( nativeType  ( int32 '+' int32 )? )
+               | ( nativeType  ( '+' int32 )? )
                | "decimal"
                | "date"
                | "bstr"
@@ -289,7 +279,7 @@ variantType ::= ( "null"
                  | "float32"
                  | "float64"
                  | #*'
-                 | ( variantType '[' ']' )
+                 | ( variantType? )
                  | ( variantType "vector" )
                  | ( variantType '&' )
                  | "decimal"
@@ -343,7 +333,7 @@ callKind ::= (  /* EMPTY */
              )
 methodName ::= ( ".ctor" | ".cctor" | dottedName )
 
-       genArity ::= ( '<' '[' int32 ']' '>' )?
+       genArity ::= ( '<' int32? '>' )?
         tyArgs0 ::= ( '<' tyArgs '>' )?
          tyArgs ::=  tyArgsNotEmpty?
  tyArgsNotEmpty ::= type | ( tyArgsNotEmpty ',' type )
@@ -407,7 +397,7 @@ classDecl ::= (  ( methodHead   methodDecls '}' )
                | ( ".override" genMethodRef "with" genMethodRef )
                | languageDecl
                | compControl
-               | ( ".param" "type" '[' int32 ']' )
+               | ( ".param" "type" int32? )
                | ( ".param" "type" dottedName )
               )
 
@@ -481,13 +471,13 @@ methodDecl  ::= (  ( ".emitbyte" int32 )
                  | languageDecl
                  | customAttrDecl
                  | compControl
-                 | ( ".export" '[' int32 ']' )
-                 | ( ".export" '[' int32 ']' "as" id )
+                 | ( ".export" int32? )
+                 | ( ".export" int32? "as" id )
                  | ( ".vtentry" int32 ':' int32 )
                  | ( ".overrid"e typeSpec "::" methodName )
                  | ( ".override" genMethodRef )
                  | scopeBlock
-                 | ( ".param" "type" '[' int32 ']' )
+                 | ( ".param" "type" int32? )
                  | ( ".param" "type" dottedName )
                  | ( ".param" '[' int32 ']' initOpt )
                 )
@@ -695,25 +685,25 @@ serInit ::= (  fieldSerInit
              | ( "type" '(' className ')' )        /* class name specified in ILAsm notation      */
              | ( "type" '(' "nullref" ')' )
              | ( "object" '(' serInit ')' )
-             | ( "float32" '[' int32 ']' '(' f32seq ')' )
-             | ( "float64" '[' int32 ']' '(' f64seq ')' )
-             | ( "int64"   '[' int32 ']' '(' i64seq ')' )
-             | ( "int32"   '[' int32 ']' '(' i32seq ')' )
-             | ( "int16"   '[' int32 ']' '(' i16seq ')' )
-             | ( "int8"    '[' int32 ']' '(' i8seq  ')' )
-             | ( "uint64"  '[' int32 ']' '(' i64seq ')' )
-             | ( "uint32"  '[' int32 ']' '(' i32seq ')' )
-             | ( "uint16"  '[' int32 ']' '(' i16seq ')' )
-             | ( "uint8"   '[' int32 ']' '(' i8seq  ')' )
-             | ( "unsigned" "int64" '[' int32 ']' '(' i64seq ')' )
-             | ( "unsigned" "int32" '[' int32 ']' '(' i32seq ')' )
-             | ( "unsigned" "int16" '[' int32 ']' '(' i16seq ')' )
-             | ( "unsigned" "int8"  '[' int32 ']' '(' i8seq  ')' )
-             | ( "char" '[' int32 ']' '(' i16seq  ')' )
-             | ( "bool" '[' int32 ']' '(' boolSeq ')' )
-             | ( "string" '[' int32 ']' '(' sqstringSeq ')' )
-             | ( "type" '[' int32 ']' '(' classSeq ')' )
-             | ( "object" '[' int32 ']' '(' objSeq ')' )
+             | ( "float32" int32? '(' f32seq ')' )
+             | ( "float64" int32? '(' f64seq ')' )
+             | ( "int64"   int32? '(' i64seq ')' )
+             | ( "int32"   int32? '(' i32seq ')' )
+             | ( "int16"   int32? '(' i16seq ')' )
+             | ( "int8"    int32? '(' i8seq  ')' )
+             | ( "uint64"  int32? '(' i64seq ')' )
+             | ( "uint32"  int32? '(' i32seq ')' )
+             | ( "uint16"  int32? '(' i16seq ')' )
+             | ( "uint8"   int32? '(' i8seq  ')' )
+             | ( "unsigned" "int64" int32? '(' i64seq ')' )
+             | ( "unsigned" "int32" int32? '(' i32seq ')' )
+             | ( "unsigned" "int16" int32? '(' i16seq ')' )
+             | ( "unsigned" "int8"  int32? '(' i8seq  ')' )
+             | ( "char" int32? '(' i16seq  ')' )
+             | ( "bool" int32? '(' boolSeq ')' )
+             | ( "string" int32? '(' sqstringSeq ')' )
+             | ( "type" int32? '(' classSeq ')' )
+             | ( "object" int32? '(' objSeq ')' )
             )
 f32seq  ::= ( float64 | int32 )*
 f64seq  ::= ( float64 | int64 )*
