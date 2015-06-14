@@ -30,17 +30,17 @@ compQstring ::= QSTRING | ( compQstring '+' QSTRING )
 slashedName ::= ( dottedName | ( slashedName '/' dottedName ) )
 
 // Class Refencing
-className ::= [ dottedName ] slashedName
-| [ mdtoken ] slashedName
-| [ * ] slashedName
-| [ ".module" dottedName ] slashedName
+className ::= dottedName? slashedName
+| mdtoken? slashedName
+| '*'? slashedName
+| ( ".module" dottedName )? slashedName
 | slashedName
 | mdtoken
 | TYPEDEF_T
 | ".this"
 | ".base"
 | ".nester"
-classNameSeq ::= /* EMPTY */ | className classNameSeq
+classNameSeq ::= ( className classNameSeq )?
 
 // Module-Level Declarations
 PROGRAM ::= decls
@@ -84,7 +84,7 @@ moduleParamDecl ::= (  ".subsystem" int32
                     )
 
 // V-Table Fixup Table Declaration
-vtfixupDecl ::= ".vtfixup" '[' int32 ']' vtfixupAttrs "at" id
+vtfixupDecl ::= ".vtfixup" int32? vtfixupAttrs "at" id
 vtfixupAttrs ::= vtfixupAttr*
 vtfixupAttr ::= (  "int32"
                  | "int64"
@@ -560,7 +560,77 @@ labels ::= (  ( id ',' labels )
             | int32
            )*
 
-
+INSTR-NONE ::= (  "add" | "add.ovf" | "add.ovf.un" | "and" | "arglist"
+                | "break"
+                | "ceq" | "cgt" | "cgt.un" | "ckfinite" | "clt" | "clt.un"
+                | "conv.i" | "conv.i1" | "conv.i2" | "conv.i4" | "conv.i8"
+                | "conv.ovf.i" | "conv.ovf.i.un"
+                | "conv.ovf.i1" | "conv.ovf.i1.un"
+                | "conv.ovf.i2" | "conv.ovf.i2.un"
+                | "conv.ovf.i4" | "conv.ovf.i4.un"
+                | "conv.ovf.i8" | "conv.ovf.i8.un"
+                | "conv.ovf.u.un"
+                | "conv.ovf.u1" | "conv.ovf.u1.un"
+                | "conv.ovf.u2" | "conv.ovf.u2.un"
+                | "conv.ovf.u4" | "conv.ovf.u4.un"
+                | "conv.ovf.u8" | "conv.ovf.u8.un"
+                | "conv.r.un" | "conv.r4" | "conv.r8"
+                | "conv.u" | "conv.u1" | "conv.u2" | "conv.u4" | "conv.u8" | "cpblk"
+                | "div" | "div.un" | "dup"
+                | "endfault" | "endfilter" | "endfinally"
+                | "initblk"
+                | "ldarg.0" | "ldarg.1" | "ldarg.2" | "ldarg.3"
+                | "ldc.i4.0" | "ldc.i4.1" | "ldc.i4.2" | "ldc.i4.3"
+                | "ldc.i4.4" | "ldc.i4.5" | "ldc.i4.6" | "ldc.i4.7" | "ldc.i4.8" | "ldc.i4.M!"
+                | "ldelem.i" | "ldelem.i1" | "ldelem.i2" | "ldelem.i4" | "ldelem.i8"
+                | "ldelem.r4" | "ldelem.r8" | "ldelem.ref"
+                | "ldelem.u1" | "ldelem.u2" | "ldelem.u4" | "ldelen"
+                | "ldloc.1" | "ldloc.2" | "ldloc.3" | "ldnull" | "localloc"
+                | "mul" | "mul.ovf" | "mul.ovf.un"
+                | "neg" | "nop" | "not"
+                | "or"
+                | "pop"
+                | "refanytype" | "rem" | "rem.un" | "ret" | "rethrow"
+                | "shl" | "shr" | "shr.un"
+                | "stelem.i" | "stelem.i1" | "stelem.i2" | "stelem.i4" | "stelem.i8"
+                | "stelem.r4" | "stelem.r8" | "stelem.ref"
+                | "stind.i" | "stind.i1" | "stind.i2" | "stind.i4" | "stind.i8"
+                | "stind.r4" | "stind.r8" | "stind.ref"
+                | "stloc.0" | "stloc.1" | "stloc.2" | "stloc.3"
+                | "sub" | "sub.ovf" | "sub.ovf.un"
+                | "tail." | "throw"
+                | "volatile."
+                | "xor"
+               )
+INSTR_VAR ::= (  "ldarg"  | "ldarg.s"
+               | "ldarga" | "ldarga.s"
+               | "ldloc"  | "ldloc.s"
+               | "ldloca" | "ldloca.s"
+               | "starg"  | "starg.s"
+               | "stloc"  | "stloc.s"
+              )
+INSTR_I  ::= ( "ldc.i4" | "ldc.i4.s" | "unaligned." )
+INSTR_i8 ::=   "ldc.i8"
+INSTR_R  ::= ( "ldc.r4" | "ldc.r8" )
+INSTR_BRTARGET ::= (  "beg" | "beg.s"
+                    | "bge" | "bge.s" | "bge.un" | "bge.un.s"
+                    | "bgt" | "bgt.s" | "bgt.un" | "bgt.un.s"
+                    | "ble" | "ble.s" | "ble.un" | "ble.un.s"
+                    | "blt" | "blt.s" | "blt.un" | "blt.un.s"
+                    | "br"  | "br.s"  | "bne.un" | "bne.un.s"
+                    | "brfalse" | "brfalse.s" | "brtrue" | "brtrue.s"
+                    | "leave" | "leave.s"
+                   )
+INSTR_METHOD ::= ( "call" | "callvirt" | "jmp" | "ldftn" | "ldvirtftn" )
+INSTR_FIELD  ::= ( "ldfld" | "ldflda" | "ldsfld" | "ldsflda" | "stfld" | "stsfld" )
+INSTR_TYPE   ::= (  "box" | "castclass" | "cpobj" | "initobj" | "isinst"
+                  | "ldelema" | "ldobj" | "mkrefany" | "newarr" | "refanyval"
+                  | "sizeof" | "stobj" | "unbox"
+                 )
+INSTR_STRING ::= "ldstr"
+INSTR_SIG    ::= "calli"
+INSTR_TOK    ::= "ldtoken"
+INSTR_SWITCH ::= "switch"
 //  Event Declaration
 eventHead  ::= ".event" eventAttr ( ( typeSpec dottedName ) | dottedName )
 eventAttr  ::= ( "rtspecialname" | "specialname" )*
