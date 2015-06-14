@@ -660,4 +660,97 @@ classSeq ::= (  "nullref"
              )*
 objSeq ::=  serInit*
 
+
+// Custom Attribute Declarations
+customAttrDecl ::= ( customDescr | customDescrWithOwner | TYPEDEF_CA )
+customDescr    ::= (  ( ".custom" customType )
+                    | ( ".custom" customType '=' compQstring )
+                    | ( ".custom" customType '=' '{' customBlobDescr '}' )
+                    | ( ".custom" customType '=' '(' bytes ')' )
+                   )
+customDescrWithOwner ::= (  (".custom" '(' ownerType ')' customType )
+                          | (".custom" '(' ownerType ')' customType '=' compQstring )
+                          | (".custom" '(' ownerType ')' customType '=' '{' customBlobDescr '}' )
+                          | (".custom" '(' ownerType ')' customType '=' '(' bytes ')'
+                         )
+
+customType ::= methodRef /* method must be .ctor */
+ownerType ::= typeSpec | memberRef
+
+// Verbal Description of Custom Attribute Initialization Blob
+customBlobDescr   ::= customBlobArgs customBlobNVPairs
+customBlobArgs    ::= ( serInit | compControl )*
+customBlobNVPairs ::= ( ( fieldOrProp serializType dottedName '=' serInit ) |  compControl )*
+fieldOrProp       ::= field | property
+serializType      ::= (  simpleType
+                       | "type"
+                       | "object"
+                       | ( "enum" "class" SQSTRING ) /* class specified in Reflection notation */
+                       | ( "enum" className ) /* class name specified in ILAsm notation */
+                       | ( serializType '[' ']' )
+                      )
+
+// Security Declarations
+secDecl ::=  (  ( ".permission" secAction typeSpec '(' nameValPairs ')' )
+              | ( ".permission" secAction typeSpec '=' '{' customBlobDescr '}' )
+              | ( ".permission" secAction typeSpec )
+              | ( ".permissionset" secAction '=' '(' bytes ')' )
+              | ( ".permissionset" secAction "bytearray" '(' bytes ')' )
+              | ( ".permissionset" secAction compQstring )
+              | ( ".permissionset" secAction '=' '{' secAttrSetBlob '}')
+              | ( secAttrSetBlob "::=" ) /* EMPTY */
+              | secAttrBlob
+              | ( secAttrBlob ',' secAttrSetBlob )
+             )
+ secAttrBlob ::=  ( typeSpec '=' '{' customBlobNVPairs '}' )
+               | ("class" SQSTRING '=' '{' customBlobNVPairs '}' )
+nameValPairs ::= nameValPair | ( nameValPair ',' nameValPairs )
+nameValPair  ::= ( compQstring '=' caValue )
+    caValue  ::= ( truefalse
+                  | int32
+                  | ( "int32" '(' int32 ')' )
+                  | compQstring
+                  | ( "className" '(' "int8"  ':' int32 ')' )
+                  | ( "className" '(' "int16" ':' int32 ')' )
+                  | ( "className" '(' "int32" ':' int32 ')' )
+                  | ( "className" '(' int32 ')' )
+                 )
+secAction ::= (  "request" | "demand" | "assert" | "deny" | "permitonly" | "linkcheck"
+               | "inheritcheck" | "reqmin" | "reqopt" | "reqrefuse" | "prejitgrant"
+               | "prejitdeny"   | "noncasdemand" | "noncaslinkdemand" | "noncasinheritance"
+              )
+
+// Aliasing of Types, Methods, Fields, and Custom Attributes
+typedefDecl ::= (  (".typedef" type        "as" dottedName ) /* TYPEDEF_TS */
+                 | (".typedef" className   "as" dottedName ) /* TYPEDEF_T  */
+                 | (".typedef" memberRef   "as" dottedName ) /* TYPEDEF_M, _F, _MR */
+                 | (".typedef" customDescr "as" dottedName ) /* TYPEDEF_CA */
+                 | (".typedef" customDescrWithOwner "as" dottedName ) /* TYPEDEF_CA */
+                )
+
+// Data Declaration
+dataDecl ::= ddHead ddBody
+ddHead   ::= ( ".data" section id '=' ) | ( ".data" section )
+section  ::= (  "tls" /* .tls section  */
+              | "cil" /* .text section */
+             )? /* defaults to .sdata section */
+ddBody      ::= ( '{' ddItemList '}' ) | ddItem
+ddItemList  ::= ( ddItem ',' ddItemList ) | ddItem
+ddItemCount ::= ( '[' int32 ']')? /* defaults to 1 */
+ddItem      ::= (   ( "char" '*' '(' compQstring ')' )
+                 | ( '&' '(' id ')' ) /* data is pointer to another data */
+                 | ( "bytearray '(' bytes ')' )
+                 | ( "float32" '(' float64 ')' ddItemCount )
+                 | ( "float64" '(' float64 ')' ddItemCount )
+                 | ( "int64" '(' int64 ')' ddItemCount )
+                 | ( "int32" '(' int32 ')' ddItemCount )
+                 | ( "int16" '(' int32 ')' ddItemCount )
+                 | ( "int8"  '(' int32 ')' ddItemCount )
+                 | ( "float32" ddItemCount )
+                 | ( "float64" ddItemCount )
+                 | ( "int64"   ddItemCount )
+                 | ( "int32"   ddItemCount )
+                 | ( "int16"   ddItemCount )
+                 | ( "int8"    ddItemCount )
+                )
 }
