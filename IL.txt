@@ -1,122 +1,663 @@
-grammar := IL
+grammar:= ILAsm
 {
-START ::= deecls
-decls ::= /* EMPTY */ | decls decl
-decl  ::= (  ( classHead       '{' classDecls       '}' )
-           | ( nameSpaceHead   '{' decls            '}' )
-           | ( methodHead      '{' methodDecls      '}' )
-           | fieldDecl
-           | dataDecl
-           | yTableDecl
-           | ytfixypDecl
-           | extSourceSpec
-           | fileDecl
-           | ( assemblyHead    '{' assemblyDecls    '}' )
-           | ( assemblyRefHead '{' assemblyRefDecls '}' )
-           | ( comtypeHead     '{' comtypeDecls     '}' )
-           | ( manifest        '{' manifestDecls    '}' )
-           | moduleHead
-           | secDecl
-           | customAttrDecl
-           | ".subsystem" int32
-           | ".corflags" int32
-           | ".file" "alignment" int32
-           | ".imagebase" int64
-           | languageDecl
-          )
 
- compQstring ::= QSTRING | ( compQstring '+' QSTRING )
+// Lexical Tokens
+        ID ::= !< C style alphanumeric identifier (e.g. Hello_There2) >!
+DOTTEDNAME ::= !< Sequence of dot-separated IDs (e.g. System.Object) >!
+   QSTRING ::= !< C style quoted string (e.g. "hi\n") >!
+  SQSTRING ::– !< single-quoted string(e.g. 'hi') >!
+     INT32 ::= !< C style 32 bit integer (e.g. 235, 03423, 0x34FFF) >!
+     INT64 ::= !< C style 64 bit integer (e.g. -2353453636235234, 0x34FFFFFFFFFF) >!
+   FLOAT64 ::= C style floating point number (e.g. -0.2323, 354.3423, 3435.34E-5) >!
+   INSTR_* ::= <! IL instructions of a particular class (see opcode.def).  >!
+   HEXBYTE ::= 1- or 2-digit hexadecimal number (e.g., A2, F0). >!
+// ILAsm keywords are in bold (e.g., .class, valuetype, marshal).
+// Comments are enclosed in pairs /* */ (e.g., /* This is a comment */).
+
+// Data Type Nonterminals
+compQstring ::= QSTRING | ( compQstring '+' QSTRING )
+      int32 ::= INT64
+      int64 ::= INT64
+    float64 ::= ( FLOAT64 | float32( int32 ) | float64( int64 ) )
+      bytes ::= hexbytes*
+   hexbytes ::= HEXBYTE | hexbytes HEXBYTE
+  truefalse ::= "true" | "false"
+    mdtoken ::= "mdtoken" '(' int32 ')'
+
+// Identifier Nonterminals
+         id ::= ( ID | SQSTRING )
+ dottedName ::= ( id | DOTTEDNAME | ( dottedName '.' dottedName ) )
+slashedName ::= ( dottedName | ( slashedName '/' dottedName ) )
+
+// Class Refencing
+className ::= [ dottedName ] slashedName
+| [ mdtoken ] slashedName
+| [ * ] slashedName
+| [ ".module" dottedName ] slashedName
+| slashedName
+| mdtoken
+| TYPEDEF_T
+| ".this"
+| ".base"
+| ".nester"
+classNameSeq ::= /* EMPTY */ | className classNameSeq
+
+// Module-Level Declarations
+PROGRAM ::= decls
+  decls ::= decl*
+   decl ::= (  moduleParamDecl
+             | manifestDecl
+             | classHead '{' classDecls '}'
+             | ".namespace" dottedName '{' decls '}' /* obsolete */
+             | methodHead methodDecls '}'
+             | fieldDecl
+             | dataDecl
+             | extSourceSpec
+             | secDecl
+             | customAttrDecl
+             | languageDecl
+             | typedefDecl
+             | compControl
+            )
+
+// Compilation Control Directives
+compControl ::= ( | ( "#define" dottedName )
+                  | ( "#define" dottedName QSTRING )
+                  | ( "#undef"  dottedName )
+                  | ( "#ifdef"  dottedName )
+                  | ( "#ifndef" dottedName )
+                  | "#else"
+                  | "#endif"
+                  | "#include" QSTRING
+                  | ';'
+                )
+// Module Parameter Declaration
+moduleParamDecl ::= (  ".subsystem" int32
+                     | ".corflags" int32
+                     | ".file" "alignment" int32
+                     | ".imagebase" int64
+                     | ".stackreserve" int64
+                     | ".typelist" '{' classNameSeq '}'
+                     | ".mscorlib"
+                     | vtableDecl // deprecated, use .vtfixup instead
+                     | vtfixupDecl
+                    )
+
+// V-Table Fixup Table Declaration
+vtfixupDecl ::= ".vtfixup" '[' int32 ']' vtfixupAttrs "at" id
+vtfixupAttrs ::= vtfixupAttr*
+vtfixupAttr ::= (  "int32"
+                 | "int64"
+                 | "fromunmanaged"
+                 | "callmostderived" // unused
+                 | "retainappdomain" // unused
+// deprecated, use .vtfixup instead
+vtableDecl ::= ".vtable" '=' '(' bytes ')'
+
+
+// Manifest Declarations
+
+manifestDecl ::= (  ".module"
+                  | ( ".module" dottedName )
+                  | ( ".module" "extern" dottedName )
+                  | assemblyHead    '{' assemblyDecls    '}'
+                  | assemblyRefHead '{' assemblyRefDecls '}'
+                  | fileDecl
+                  | exptypeHead     '{' exptypeDecls     '}'
+                  | manifestResHead '{' manifestResDecls '}'
+                  | moduleHead
+                 )
+
+assemblyHead ::= ".assembly" asmAttrs dottedName
+asmAttrs ::= asmAttr*
+ asmAttr ::= (  "retargetable"
+              | "legacy" "library" /* for backward compatibility only */
+              | "cil"
+              | "x86"
+              | "ia64"
+              | "amd64"
+             )
+assemblyDecls ::= assemblyDecl*
+assemblyDecl  ::= ( ( ".hash" "algorithm" int32 )
+                   | secDecl
+                   | asmOrRefDecl
+                  )
+intOrWildcard ::= int32 | '*'
+asmOrRefDecl ::= (  ( ".publickey" '=' '(' bytes ')' )
+                  | ( ".ver" intOrWildcard ':' intOrWildcard ':' intOrWildcard ':' intOrWildcard )
+                  | ( ".locale" compQstring )
+                  | ".locale" '=' '(' bytes ')'
+                  | customAttrDecl
+                  | compControl
+                 )
+ assemblyRefHead ::=  ( ".assembly" "extern" asmAttr dottedName )
+                    | ( ".assembly" "extern" asmAttr dottedName "as" dottedName )
+assemblyRefDecls ::= assemblyRefDecl*
+ assemblyRefDecl ::= (  (".hash" '=' '(' bytes ')' )
+                      | asmOrRefDecl
+                      | ".publickeytoken" '=' '(' bytes ')'
+                      | "auto"
+      fileDecl ::=  ( ".file" fileAttr dottedName fileEntry ".hash =" '(' bytes ')' fileEntry )
+                   | ( ".file" fileAttr dottedName fileEntry )
+      fileAttr ::= nometadata*
+     fileEntry ::= ".entrypoint"
+   exptypeHead ::= ".class" "extern" exptAttrs dottedName
+     exptAttrs ::= exprAttr*
+nestedExptAttr ::= "nested"
+                   ( "public" | "private" | "family" | "assembly" | "famandassem" | "famorassem" )
+      exptAttr ::= (  "private"
+                    | "public"
+                    | "forwarder"
+                    | nestedExptAttr
+                   )
+exptypeDecls ::= exptypeDecl*
+exptypeDecl ::= (  ( ".file" dottedName )
+                 | ( ".class" "extern" slashedName )
+                 | ( ".assembly" "extern" dottedName )
+                 | ( "mdtoken" '(' int32 ')'
+                 | ( ".class" int32 )
+                 | customAttrDecl
+                 | compControl
+                )
+manifestResHead ::=  ( ".mresource" manresAttr dottedName
+                   | ( ".mresource" manresAttrs dottedName "as" dottedName )
+     manresAttrs ::= manresAttr*
+      manresAttr ::= "public" | "private"
+manifestResDecls ::= manifestResDecl*
+ manifestResDecl ::= (  ( ".file" dottedName "at" int32 )
+                      | ( ".assembly" extern dottedName )
+                      | customAttrDecl
+                      | compControl
+                     )
+
+// Managed Types in Signatures
+type ::= (  ( "class" className )
+          | ( "value" "class" className )
+          | ( valuetype className )
+          | ( type '[' ']' )
+          | ( type '[' bounds ']' )
+          | ( type '&' )
+          | ( type '*' )
+          | ( type "pinned" )
+          | ( type "modreq" '(' typeSpec ')' )
+          | ( type "modopt" '(' typeSpec ')' )
+          | ( "method" callConv type '*' '(' sigArgs0 ')' )
+          | ( type '<' tyArgs '>' )
+          | ( '!' '!' int32 )
+          | ( '!' int32 )
+          | ( '!' '!' dottedName )
+          | ( '!' dottedName )
+          | "object"
+          | "typedref"
+          | "void"
+          | ( "native" "int" )
+          | ( "native" "unsigned" "int" )
+          | ( "native" "uint" )
+          | ( "native" "float" )
+          | simpleType
+          | ( "..." type )
+         )
+
+simpleType ::= (  "char"
+                | "string"
+                | "bool"
+                | intType
+                | "float32"
+                | "float64"
+                | TYPEDEF_TS
+               )
+intType ::= (  "int8"
+             | "int16"
+             | "int32"
+             | "int64"
+             | "unsigned" "int8"
+             | "unsigned" "int16"
+             | "unsigned" "int32"
+             | "unsigned" "int64"
+             | "uint8"
+             | "uint16"
+             | "uint32"
+             | "uint64"
+            )
+
+bounds ::= bound ( ',' bound )*
+ bound ::= ( "..."
+            | int32
+            | ( int32 "..." int32 )
+            | ( int32 "..." )
+           )
+typeSpec ::= (   className
+              | ( '[' dottedName ']' )
+              | ( '[' ".module" dottedName ']' )
+              | type
+             )
+
+// Native Types in Marshalling Signatures
+nativeType ::=(
+               | ( "custom" '(' compQstring ',' compQstring ',' compQstring ',' compQstring ')' )
+               | ( "custom" '(' compQstring ',' compQstring ')' )
+               | ( "fixed" "sysstring" '[' int32 ']' )
+               | ( "fixed" "array" '[' int32 ']' nativeType )
+               | "variant"
+               | "currency"
+               | "syschar"
+               | "void"
+               | "bool"
+               | intType
+               | "float32"
+               | "float64"
+               | "error"
+               | ( nativeType '*' )
+               | ( nativeType '[' ']' )
+               | ( nativeType '[' int32 ']' )
+               | ( nativeType '[' int32 '+' int32 ']' )
+               | ( nativeType '[' '+' int32 ']' )
+               | "decimal"
+               | "date"
+               | "bstr"
+               | "lpstr"
+               | "lpwstr"
+               | "lptstr2
+               | "objectref"
+               | ("iunknown" iidParamIndex)
+               | ("idispatch" iidParamIndex)
+               | "struct"
+               | ("interface" iidParamIndex )
+               | ("safearray" variantType)
+               | ("safearray" variantType ',' compQstring )
+               | "int"
+               | ("unsigned" "int")
+               | "uint"
+               | ("nested" "struct")
+               | "byvalstr"
+               | ("ansi" "bstr")
+               | "tbstr"
+               | ("variant" "bool")
+               | "method"
+               | ( "as" "any" )
+               | "lpstruct"
+               | TYPEDEF_TS
+              )?
+
+iidParamIndex ::=  ( '(' "iidparam" '=' int32 ')' )?
+variantType ::= ( "null"
+                 | "variant"
+                 | "currency"
+                 | "void"
+                 | "bool"
+                 | intType
+                 | "float32"
+                 | "float64"
+                 | #*'
+                 | ( variantType '[' ']' )
+                 | ( variantType "vector" )
+                 | ( variantType '&' )
+                 | "decimal"
+                 | "date"
+                 | "bstr"
+                 | "lpstr"
+                 | "lpwstr"
+                 | "iunknown"
+                 | "idispatch"
+                 | "safearray"
+                 | "int"
+                 | ( "unsigned" "int")
+                 | "uint"
+                 | "error"
+                 | "hresult"
+                 | "carray"
+                 | "userdefined"
+                 | "record"
+                 | "filetime"
+                 | "blob"
+                 | "stream"
+                 | "storage"
+                 | "streamed_object"
+                 | "stored_object"
+                 | "blob_object"
+                 | "cf"
+                 | "clsid"
+                )?
+
+// Method and Field Referencing
+
+methodRef ::= (  ( callConv type typeSpec "::" methodName tyArgs0 '(' sigArgs0 ')' )
+               | ( callConv type methodName tyArgs0 '(' sigArgs0 ')' )
+               | mdtoken
+               | TYPEDEF_M
+               | TYPEDEF_MR
+              )
+genMethodRef ::= ( method callConv type typeSpec "::" methodName genArity '(' sigArgs0 ')' )
+callConv ::=(  ( "instance" callConv )
+             | ( "explicit" callConv )
+             | callKind
+             | ( callconv '(' int32 ')' )
+
+callKind ::= (  /* EMPTY */
+              | "default"
+              | "vararg"
+              | ( "unmanaged" "cdecl" )
+              | ( "unmanaged" "stdcall" )
+              | ( "unmanaged" "thiscall" )
+              | ( "unmanaged" "fastcall" )
+             )
+methodName ::= ( ".ctor" | ".cctor" | dottedName )
+
+       genArity ::= ( '<' '[' int32 ']' '>' )?
+        tyArgs0 ::= ( '<' tyArgs '>' )?
+         tyArgs ::=  tyArgsNotEmpty?
+ tyArgsNotEmpty ::= type | ( tyArgsNotEmpty ',' type )
+       sigArgs0 ::= sigArgsNotEmpty?
+sigArgsNotEmpty ::= sigArg | ( sigArgsNotEmpty ',' sigArg )
+         sigArg ::= ( ( "..." /* ellipsis */ )
+                     | ( paramAttr type marshalClause )
+                     | ( paramAttr type marshalClause id )
+                    )
+       fieldRef ::= (  ( type typeSpec "::" dottedName )
+                     | ( type dottedName )
+                     | TYPEDEF_F
+                     | TYPEDEF_MR
+                     | mdtoken
+                    )
+memberRef ::= ( "method" methodRef ) | ( "field" fieldRef )
+
+// Class Declaration
+classHead ::= classHeadBegin extendsClause implClause
+classHeadBegin ::= .class classAttr dottedName typarsClause
+classAttrs ::= classAttr*
+
+classAttr ::=  (  "public" | "private" | "value" | "enum" | "interface" | "sealed"
+                | "abstract" | "auto" | "sequential" | "explicit" | "ansi"
+                | "unicode" | "autochar" | "import" | "serializable" | nestedclassAttr
+                | "beforefieldinit" | "specialname" | "rtspecialname" | ( "flags" '(' int32 ')' )
+               )
+nestedClassAttr ::= "nested" (  "public" | "private" | "family" | "assembly" | "famandassem" | "famorassem" )
+
+extendsClause ::= ( "extends" typeSpec )?
+   implClause ::= ( "implements" implList )?
+     implList ::= ( implList ',' typeSpec ) | typeSpec
+
+
+// Generic Type Parameter Declaration
+
+        typeList ::= typeListNotEmpty?
+typeListNotEmpty ::= typeSpec | ( typeListNotEmpty ',' typeSpec )
+    typarsClause ::= ( '<' typars '>' )?
+     typarAttrib ::= ( '+' | '-' | "class" | "valuetype" | ".ctor" )
+    typarAttribs ::= typarAttrib*
+          typars ::= ( typarAttribs tyBound dottedName typarsRest ) | ( typarAttribs dottedName typarsRest )
+      typarsRest ::= ( ',' typars )?
+         tyBound ::= '(' typeList ')'
+
+// Class Body Declarations
+classDecls ::= classDecl*
+classDecl ::= (  ( methodHead   methodDecls '}' )
+               | ( classHead '{' classDecls '}' )
+               | ( eventHead '{' eventDecls '}' )
+               | (  propHead '{' propDecls  '}' )
+               | fieldDecl
+               | dataDecl
+               | secDecl
+               | extSourceSpec
+               | customAttrDecl
+               | ( ".size" int32 )
+               | ( ".pack" int32 )
+               | ( ".override" typeSpec "::" methodName "with"
+                        callConv type typeSpec "::" methodName '(' sigArgs0 ')' )
+               | ( ".override" genMethodRef "with" genMethodRef )
+               | languageDecl
+               | compControl
+               | ( ".param" "type" '[' int32 ']' )
+               | ( ".param" "type" dottedName )
+              )
+
+
+// Field Declaration
+
+fieldDecl ::= ".field" repeatOpt fieldAttr marshalClause type dottedName atOpt initOpt
+fieldAttrs ::= fieldAttr*
+fieldAttr ::= (  "static" | "public" | "private" | "family" | "assembly"
+               | "famandassem" | "famorassem" | "privatescope" | "initonly"
+               | "rtspecialname" | "specialname" | "literal" | "notserialized"
+               | ( "flags" '(' int32 ')' )
+              )
+marshalClause ::= ( "marshal" '(' nativeType ')')?
+        atOpt ::= ( "at" id )?
+      initOpt ::= ( '=' fieldInit )?
+    repeatOpt ::= ( '[' int32 ']' )?
+
+// Method Declaration
+methodHead ::= ".method" methAttr callConv paramAttr type marshalClause
+                   methodName typarsClause '(' sigArgs0 ')' implAttr '{'
+methAttr ::= (  "static" | "public" | "private" | "family" | "assembly"
+              | "famandassem" | "famorassem"
+              | "privatescope" /* default */
+              | "final" | "virtual" | "strict" | "abstract"
+              | "hidebysig" | "newslot"
+              | "specialname" | "rtspecialname"
+              | "unmanagedexp" /* unused */
+              | "reqsecobj"
+              | ( "flags" '(' int32 ')' )
+              | ( "pinvokeimpl" '(' compQstring "as" compQstring pinvAttr ')' )
+              | ( "pinvokeimpl" '(' compQstring pinvAttr ')' )
+              | ( "pinvokeimpl" '(' pinvAttr ')' )
+             )*
+pinvAttr ::= (  "nomangle" | "ansi" | "unicode" | "autochar" | "lasterr" | "winapi"
+              | "cdecl" | "stdcall | "thiscall" | "fastcall"
+              | ( "bestfit" ':' ("on" | "off") )
+              | ( "charmaperror" ':' ("on" | "off") )
+              | ( "flags" '(' int32 ')' )
+             )*
+
+paramAttr ::= ( ( '[' ("in" | "out" | "opt") ']' ) | ( '[' int32 ']') )*
+implAttr ::= ( | "native"
+               | "cil"     /* default */
+               | "optil"   /* unused  */
+               | "managed" /* default */
+               | "unmanaged"
+               | "forwardref"
+               | "preservesig"
+               | "runtime"
+               | "internalcall"
+               | "synchronized"
+               | "noinlining"
+               | ( "flags" '(' int32 ')')
+             )*
+
+// Method Body Declarations
+methodDecls ::= methodDecl*
+methodDecl  ::= (  ( ".emitbyte" int32 )
+                 | mehBlock
+                 | ( ".maxstack" int32 )
+                 | ( ".locals" '(' sigArgs0 ')' )
+                 | ( ".locals" "init" '(' sigArgs0 ')' )
+                 | ".entrypoint"
+                 | ".zeroinit" /* deprecated, use .locals init */
+                 | dataDecl
+                 | instr
+                 | ( id ':' ) /* label */
+                 | secDecl
+                 | extSourceSpec
+                 | languageDecl
+                 | customAttrDecl
+                 | compControl
+                 | ( ".export" '[' int32 ']' )
+                 | ( ".export" '[' int32 ']' "as" id )
+                 | ( ".vtentry" int32 ':' int32 )
+                 | ( ".overrid"e typeSpec "::" methodName )
+                 | ( ".override" genMethodRef )
+                 | scopeBlock
+                 | ( ".param" "type" '[' int32 ']' )
+                 | ( ".param" "type" dottedName )
+                 | ( ".param" '[' int32 ']' initOpt )
+                )
+scopeBlock ::= '{' methodDecls '}'
+
+
+// External Source Directives
 
 languageDecl ::= (  ( ".language" SQSTRING )
                   | ( ".language" SQSTRING ',' SQSTRING )
                   | ( ".language" SQSTRING ',' SQSTRING ',' SQSTRING )
                  )
+extSourceSpec ::= ( esHead int32)
+                  ( SQSTRING
+                   | ( ':' int32 SQSTRING )
+                   | ( ':' int32 )
+                   | ( ':' int32 ',' int32 SQSTRING )
+                   | ( ':' int32 ',' int32 )
+                   | ( ',' int32 ':' int32 SQSTRING )
+                   | ( ',' int32 ':' int32 )
+                   | ( ',' int32 ':' int32 ',' int32 SQSTRING )
+                   | ( ',' int32 ':' int32 ',' int32 )
+                   | QSTRING
+                  )
+esHead ::= ".line" | "#line"
 
-customAttriDecl ::= (  ( ".custom" customType )
-                     | ( ".custom" customType '=' compQsstring )
-                     | ( customHead bytes ')'
-                     | ( ".custom" '(' ownerType ')' customType )
-                     | ( ".custom" '(' ownerType ')' customType '=' compQstring )
-                     | customHeadWithOwner byte ')'
-                    )
-moduleHead ::= (  ".module"
-                | ".module" name1
-                | ".module" "extern" name1
+// Managed Exception Handling Directives
+mehBlock   ::= tryBlock mehClauses
+mehClauses ::= mehClause+
+tryBlock   ::= ( ( ".try" scopeBlock )
+                | ( ".try" id "to" id )
+                | ( ".try" int32 "to" int32 )
                )
+mehClause ::= (  ( "catch" typeSpec handlerBlock )
+               | ( filterClause handlerBlock )
+               | ( "finally" handlerBlock )
+               | ( "fault" handlerBlock )
+              )
+filterClause ::= "filter" ( scopeBlock | id | int32 )
+handlerBlock ::= (  scopeBlock
+                  | ( "handler" id "to" id )
+                  | ( "handler" int32 "to" int32 )
+                 )
 
-vtfixupDecl ::= "vtfixup" '[' int32 ']' vtfixupAttr "at" id
+//  IL Instructions
+instr ::=
+( INSTR_NONE /* nop, add, ldc.i4.1, ldnull, ldarg.0, and so on */
+| INSTR_VAR int32 /* ldarg, ldarga, starg, ldloc, ldloca, stloc */
+| INSTR_VAR id
+| INSTR_I int32 /* ldc.i4 */
+| INSTR_I8 int64 /* ldc.i8 */
+| INSTR_R float64 /* ldc.r4, ldc.r8 */
+| INSTR_R int64
+| INSTR_R '(' bytes ')'
+| INSTR_BRTARGET int32 /* br, beq, ble, brtrue, etc. */
+| INSTR_BRTARGET id
+| INSTR_METHOD methodRef /* call, callvirt, jmp, ldftn, ldvirtftn, newobj */
+| INSTR_FIELD fieldRef /* ldfld, stfld, ldflda, ldsflda, stfld, stsfld */
+| INSTR_TYPE typeSpec /* ldobj, stobj, box, unbox, newarr, etc. */
+| INSTR_STRING compQstring /* ldstr */
+| INSTR_STRING "ansi" '(' compQstring ')'
+| INSTR_STRING "bytearray" '=' '(' bytes ')'
+| INSTR_SIG callConv type ( sigArgs0 ) /* calli */
+| INSTR_TOK ownerType /* ldtoken; ownerType ::= memberRef | typeSpec */
+| INSTR_SWITCH '(' labels ')'
+)
+labels ::= (  ( id ',' labels )
+            | ( int32 ',' labels )
+            | id
+            | int32
+           )*
 
-vtfixupAttr ::= ( | /* Empty */
-                  | vtfixupAttr "int32"
-                  | vtfixupAttr "int64"
-                  | vtfixupAttr "fromunmanaged"
-                  | vtfixupAttr "callmostderived"
-                )
 
-vtableDecl ::= vtableHead bytes ')'
-
-vtableHead ::= ".vtable" '=' '('
-
-nameSpaceHead ::= ".namespace" name1
-
-classHead ::= ".class" classAttr od extendsClause implClause
-
-classAttr ::=  (  /* EMPTY */
-                | classAttr "public"
-                | classAttr "private"
-                | classAttr "value"
-                | classAttr "enum"
-                | classAttr "interface"
-                | classAttr "sealed"
-                | classAttr "abstract"
-                | classAttr "auto"
-                | classAttr "sequential"
-                | classAttr "explicit"
-                | classAttr "ansi"
-                | classAttr "unicode"
-                | classAttr "autochar"
-                | classAttr "import"
-                | classAttr "serializable"
-                | classAttr "nested" "public"
-                | classAttr "nested" "private"
-                | classAttr "nested" "family"
-                | classAttr "nested" "assembly"
-                | classAttr "nested" "famandassem"
-                | classAttr "nessed" "famorassem"
-                | classAttr "beforefieldinit"
-                | classAttr "specialname"
-                | classAttr "rtspecialname"
-               )
-
-extendsClause ::=  /* EMPTY */ | ( "extends" className )
-   implClause ::=  /* EMPTY */ | ( "implements" classNames )
-
-classNames ::= ( classNames ',' className ) | className
-classDecls ::= /* EMPTY */ | ( classDecls classDecl )
-classDecl  ::= (  ( methodHead   methodDecls '}' )
-                | ( classHead '{' classDecls '}' )
-                | ( eventHead '{' eventDecls '}' )
-                | ( propHead  '{' propDecls '}' )
-                | fieldDecl
-                | dataDecl
-                | secDecl
+//  Event Declaration
+eventHead  ::= ".event" eventAttr ( ( typeSpec dottedName ) | dottedName )
+eventAttr  ::= ( "rtspecialname" | "specialname" )*
+eventDecls ::= eventDecl*
+eventDecl  ::= (  ( ".addon" methodRef )
+                | ( ".removeon" methodRef )
+                | ( ".fire" methodRef )
+                | ( ".other" methodRef )
                 | extSourceSpec
                 | customAttrDecl
-                | ( ".size" int32 )
-                | ( ".pack" int32 )
-                | ( exportHead '{' comTypeDecls '}' )
-                | ( ".overrides" typeSpec "::" methodName "with" callConv
-                      type typeSpc "::" methodName '{' sigArgs '}' )
                 | languageDecl
-               )
+                | compControl
+              )
 
-fieldDecl ::= ".field" repeatOpt fieldAttr type id atOpt initOpt
+//  Property Declaration
+propHead  ::= ".property" propAttr callConv type dottedName '(' sigArgs0 ')' initOpt
+propAttr  ::= ( "rtspecialname" | "specialname" )*
+propDecls ::= propDecl*
+propDecl  ::= (  ( ".set"   methodRef )
+               | ( ".get"   methodRef )
+               | ( ".other" methodRef )
+               | extSourceSpec
+               | customAttrDecl
+               | languageDecl
+               | compControl
+              )
 
-atOpt ::= /* EMPTY */ | ( "at" id )
-initOpt ::= /* EMPTY */ | ( '=' fieldInit )
-repeatOpt ::= /* EMPTY */ | ( '[' int32 ']' )
 
-customHead ::= ".custom" customType '=' '('
-customHeadWithOwner ::= ".custom" '(' ownerType ')' customType '=' '('
+//  Constant Declarations
+// Default values declaration for fields, properties, parameters
+// and verbal form of Custom Attribute blob description
+// Field/property/parameter initialization
+
+fieldInit    ::= ( fieldSerInit | compQstring | "nullref" )
+fieldSerInit ::= (  ( "float32" '(' float64 ')' )
+                  | ( "float64" '(' float64 ')' )
+                  | ( "float32" '(' int32   ')' )
+                  | ( "float64" '(' int64   ')' )
+                  | ( "int64"   '(' int64   ')' )
+                  | ( "int32"   '(' int32   ')' )
+                  | ( "int16"   '(' int32   ')' )
+                  | ( "int8"    '(' int32   ')' )
+                  | ( "unsigned" "int64" '(' int64 ')' )
+                  | ( "unsigned" "int32" '(' int32 ')' )
+                  | ( "unsigned" "int16" '(' int32 ')' )
+                  | ( "unsigned" "int8"  '(' int32 ')' )
+                  | ( "uint64" '(' int64 ')' )
+                  | ( "uint32" '(' int32 ')' )
+                  | ( "uint16" '(' int32 ')' )
+                  | ( "uint8"  '(' int32 ')' )
+                  | ( "char" '(' int32 ')' )
+                  | ( "bool" '(' truefalse ')' )
+                  | ( "bytearray" '(' bytes ')' )
+                 )
+
+// Values for verbal form of CA blob description
+
+serInit ::= (  fieldSerInit
+             | ( "string" '(' "nullref" ')' )
+             | ( "string" '(' SQSTRING  ')' )
+             | ( "type" '(' "class" SQSTRING ')' ) /* class name specified in Reflection notation */
+             | ( "type" '(' className ')' )        /* class name specified in ILAsm notation      */
+             | ( "type" '(' "nullref" ')' )
+             | ( "object" '(' serInit ')' )
+             | ( "float32" '[' int32 ']' '(' f32seq ')' )
+             | ( "float64" '[' int32 ']' '(' f64seq ')' )
+             | ( "int64"   '[' int32 ']' '(' i64seq ')' )
+             | ( "int32"   '[' int32 ']' '(' i32seq ')' )
+             | ( "int16"   '[' int32 ']' '(' i16seq ')' )
+             | ( "int8"    '[' int32 ']' '(' i8seq  ')' )
+             | ( "uint64"  '[' int32 ']' '(' i64seq ')' )
+             | ( "uint32"  '[' int32 ']' '(' i32seq ')' )
+             | ( "uint16"  '[' int32 ']' '(' i16seq ')' )
+             | ( "uint8"   '[' int32 ']' '(' i8seq  ')' )
+             | ( "unsigned" "int64" '[' int32 ']' '(' i64seq ')' )
+             | ( "unsigned" "int32" '[' int32 ']' '(' i32seq ')' )
+             | ( "unsigned" "int16" '[' int32 ']' '(' i16seq ')' )
+             | ( "unsigned" "int8"  '[' int32 ']' '(' i8seq  ')' )
+             | ( "char" '[' int32 ']' '(' i16seq  ')' )
+             | ( "bool" '[' int32 ']' '(' boolSeq ')' )
+             | ( "string" '[' int32 ']' '(' sqstringSeq ')' )
+             | ( "type" '[' int32 ']' '(' classSeq ')' )
+             | ( "object" '[' int32 ']' '(' objSeq ')' )
+            )
+f32seq  ::= ( float64 | int32 )*
+f64seq  ::= ( float64 | int64 )*
+i64seq  ::= ( int64 )*
+i32seq  ::= ( int32 )*
+i16seq  ::= ( int32 )*
+i8seq   ::=  ( int32 )*
+boolSeq ::= ( truefalse )*
+sqstringSeq ::= ( "nullref" | SQSTRING )*
+
+classSeq ::= (  "nullref"
+              | ( "class" SQSTRING ) /* class name specified in Reflection notation */
+              | ( className )        /* class name specified in ILAsm notation      */
+             )*
+objSeq ::=  serInit*
 
 }
